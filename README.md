@@ -1,3 +1,3 @@
 # PriCoSha
-Web app using Flask and MySql for CS-3083 Intro to Databases at NYU Tandon
+Web app using Flask and MySql for CS-3083 Intro to Databases at NYU Tandon. \n
 We are using Python 3, and are using pymysql to connect to our database. 
