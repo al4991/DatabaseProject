@@ -1,5 +1,6 @@
 from flask import Flask, render_template, session, redirect
 from flask import url_for, escape, request, flash 
+import pymysql.cursors
 
 app = Flask(__name__)
 app.secret_key = "Doesn'tMatterRn"
@@ -14,37 +15,12 @@ db = pymysql.connect(host='localhost',
 
 
 @app.route("/")
-def home():
+def index():
     if 'useremail' in session:
     	return 'Logged in as %s' % escape(session['useremail'])
 
     return "You ain't logged in"
 
-'''
-Original iteration. Should be deleted in the future, but commenting out for now
-@app.route('/login', methods=['GET','POST'])
-def login():
-	if 'useremail' in session: 
-		return redirect(url_for('home'))
-
-	if request.method == 'POST':
-		user_email = request.form['email']
-	    password = request.form['password']
-	    place.execute("SELECT count(*) FROM Person WHERE email = %s;",[user_email])
-	    if place.fetchone()[0]:
-	    	place.execute("SELECT password FROM Person WHERE email = %s;", [user_email])
-	    	row = place.fetchone(): 
-	    		if password == row[0]:
-	    			session['useremail'] = request.form['useremail']
-	    			return redirect(url_for('home'))
-	    		else:
-	    			flash('Something is wrong')
-
-
-	    else:
-	    	flash("Something is wrong pops")
-	   	return render_template('login.html')
-'''
 
 @app.route('/login', methods=['GET', 'POST'])
 def login(): 
@@ -68,7 +44,7 @@ def login():
     	# creates a session for the user
     	session['useremail'] = user_email
     	# redirecting user to our main page
-    	return redirect(url_for('home'))
+    	return redirect(url_for('/'))
     else: 
     	# Means we didn't find the login info, so failed login
     	# We create an error to pass to our html
@@ -85,7 +61,7 @@ def signup():
 @app.route('/logout')
 def logout(): 
 	session.pop('useremail', None)
-	return redirect(url_for('home'))
+	return redirect(url_for('/'))
 
 
 if __name__ == "__main__":
