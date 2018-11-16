@@ -83,7 +83,8 @@ def post():
     cursor = conn.cursor()
     blog = request.form['blog']
     query = 'INSERT INTO blog (blog_post,email) VALUES(%s, %s)'
-    cursor.execute(query,(blog,user_email))        conn.commit()
+    cursor.execute(query,(blog,user_email))        
+    conn.commit()
     cursor.close()
     return redirect(url_for('home'))
 
