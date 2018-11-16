@@ -42,15 +42,23 @@ def login():
     # Checking to see if the login info actually exists or not 
     if (data):
     	# creates a session for the user
-    	session['useremail'] = user_email
+    	# session['useremail'] = user_email
     	# redirecting user to our main page
-    	return redirect(url_for('/'))
+    	# return redirect(url_for('/'))
+        error = "This user already exists"
+        cursor.close()
+        return render.template('signup.html',error=error)
     else: 
     	# Means we didn't find the login info, so failed login
     	# We create an error to pass to our html
-    	flash("Something is wrong. Login failed")
-    	error = "Invalid email or password"
-    	return render_template('login.html', error=error)
+    	#flash("Something is wrong. Login failed")
+    	#error = "Invalid email or password"
+    	#return render_template('login.html', error=error)
+        ins = 'INSERT INTO user VALUES(%S, %S)'
+        cursor.execute(ins,(user_email,password))
+        conn.commit()
+        cursor.close()
+        return render_template('index.html')
 
 
 @app.route('/signup', methods=['GET', 'POST'])
@@ -67,3 +75,30 @@ def logout():
 if __name__ == "__main__":
 	app.run('127.0.0.1', 5000, debug = True)
 
+
+    
+@app.route('/post',methods=['GET','POST'])
+def post():
+    user_email = session['email']
+    cursor = conn.cursor()
+    blog = request.form['blog']
+    query = 'INSERT INTO blog (blog_post,email) VALUES(%s, %s)'
+    cursor.execute(query,(blog,user_email))        conn.commit()
+    cursor.close()
+    return redirect(url_for('home'))
+
+@app.route('/home')
+def home():
+    user_email = session['email']
+    cursor = conn.cursor()
+    query = 'SELECT ts, blog_post FROM blog WHERE email = %s ORDER BY ts DESC'
+    cursor.execute(query,(user_email))
+    data = cursor.fetchall()
+    cursor.close()
+    return render_template('home.html',user_email=email, posts=data)
+
+
+@app.route('/logout')
+def logout():
+    session.pop('email')
+    return redirect('/')
