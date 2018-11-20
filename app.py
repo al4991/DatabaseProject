@@ -16,8 +16,8 @@ db = pymysql.connect(host='localhost',
 
 @app.route("/")
 def index():
-    if 'useremail' in session:
-    	return 'Logged in as %s' % escape(session['useremail'])
+    if 'email' in session:
+    	return 'Logged in as %s' % escape(session['email'])
 
     return "You ain't logged in"
 
@@ -65,17 +65,6 @@ def login():
 def signup(): 
 	return render_template('signup.html')
 
-
-@app.route('/logout')
-def logout(): 
-	session.pop('useremail', None)
-	return redirect(url_for('/'))
-
-
-if __name__ == "__main__":
-	app.run('127.0.0.1', 5000, debug = True)
-
-
     
 @app.route('/post',methods=['GET','POST'])
 def post():
@@ -103,3 +92,6 @@ def home():
 def logout():
     session.pop('email')
     return redirect('/')
+
+if __name__ == "__main__":
+    app.run('127.0.0.1', 5000, debug = True)
