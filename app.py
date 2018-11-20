@@ -85,7 +85,7 @@ def home():
     cursor.execute(query,(user_email))
     data = cursor.fetchall()
     cursor.close()
-    return render_template('home.html',user_email=email, posts=data)
+    return render_template('home.html', email=user_email, posts=data)
 
 
 @app.route('/logout')
