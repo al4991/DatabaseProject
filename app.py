@@ -6,10 +6,10 @@ app = Flask(__name__)
 app.secret_key = "Doesn'tMatterRn"
 
 # Setting up MySQL
-db = pymysql.connect(host='localhost',
+conn = pymysql.connect(host='localhost',
 	                 user='root',
-	                 password='root',
-	                 db='meetup',
+	                 password='',
+	                 conn='pricosha',
 	                 charset='utf8mb4',
 	                 cursorclass=pymysql.cursors.DictCursor)
 
@@ -24,11 +24,13 @@ def index():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login(): 
+    if request.method == 'GET':
+        return render_template('login.html')
 	# Get the info we have in the form
     user_email = request.form['email']
     password = request.form['password']
     # Set up cursor to prepare for executing queries
-    cursor = db.cursor()
+    cursor = conn.cursor()
     # Templating the query to check email and password
     # FOR THE FUTURE: we need to account for the fact that we will 
     # be hashing passwords :) 
