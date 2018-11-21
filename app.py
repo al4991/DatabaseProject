@@ -8,7 +8,7 @@ app.secret_key = "Doesn'tMatterRn"
 # Setting up MySQL
 conn = pymysql.connect(host='localhost',
                        user='root',
-                       password='',
+                       password='root',
                        db='pricosha',
                        charset='utf8mb4',
                        cursorclass=pymysql.cursors.DictCursor)
@@ -56,7 +56,7 @@ def loginAuth():
         cursor.execute(query)
         data = cursor.fetchall()
         cursor.close()
-        return render_template('home.html', email=user_email, posts=data)
+        return redirect(url_for('home'))
     else: 
         # Means we didn't find the login info, so failed login
         # We create an error to pass to our html
