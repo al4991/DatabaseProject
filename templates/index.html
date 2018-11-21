@@ -3,7 +3,7 @@
 
 <head>
 	<title> YEEEEEEEEEE </title>
-<head>
+</head>
     <h1>Welcome</h1>
     <a href="{{ url_for('login') }}">Login</a>
     <a href="{{ url_for('register') }}">Register</a>
@@ -16,15 +16,20 @@
     </style>
     
     <table>
+        <th>ID</th>
+        <th>Email</th>
         <th>Time</th>
+        <th>File Path</th>
         <th>Post</th>
         
     {% for line in posts %}
         <tr>
-            <td>{{line.ts}}</td>
-            <td>{{line.blog_post}}</td>
+            <td>{{ line.item_id }}</td>
+            <td>{{ line.email_post }}</td>
+            <td>{{ line.post_time }}</td>
+            <td>{{ line.file_path }}</td>
+            <td>{{ line.item_name }}</td>
         </tr>
     {% endfor %}
     </table>
-    
-    <a href="/logout">Logout</a>
+</html>

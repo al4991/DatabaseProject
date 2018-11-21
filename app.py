@@ -16,7 +16,12 @@ conn = pymysql.connect(host='localhost',
 
 @app.route("/")
 def index():
-    return render_template('index.html')
+    query = "SELECT * FROM ContentItem WHERE is_pub = 1 AND post_time + INTERVAL 24 hour >= CURRENT_TIMESTAMP"
+    cursor = conn.cursor()
+    cursor.execute(query)
+    data = cursor.fetchall()
+    cursor.close()
+    return render_template('index.html', posts=data)
 
 
 @app.route('/login')
@@ -25,14 +30,14 @@ def login():
 
 @app.route('/loginAuth', methods=['GET', 'POST'])
 def loginAuth():
-    user_email = request.form['email']
+    user_email = request.form['userEmail']
     password = request.form['password']
     # Set up cursor to prepare for executing queries
     cursor = conn.cursor()
     # Templating the query to check email and password
     # FOR THE FUTURE: we need to account for the fact that we will 
     # be hashing passwords
-    query = 'SELECT * FROM PERSON WHERE email = %s and password = %s'
+    query = 'SELECT fname, lname FROM PERSON WHERE email = %s and password = SHA2(%s, 256)'
     cursor.execute(query, (user_email, password))
     # Grab the row with email and password (if it exists)
     data = cursor.fetchone()
@@ -42,10 +47,15 @@ def loginAuth():
     # Checking to see if the login info actually exists or not 
     if (data):
         # creates a session for the user
-        session['email'] = user_email
+        session['userEmail'] = user_email
         # redirecting user to our main page
         # return redirect(url_for('/'))
-        return render.template('index.html')
+        query = "SELECT * FROM ContentItem WHERE is_pub = 1 AND post_time + INTERVAL 24 hour >= CURRENT_TIMESTAMP"
+        cursor = conn.cursor()
+        cursor.execute(query)
+        data = cursor.fetchall()
+        cursor.close()
+        return render_template('home.html', email=user_email, posts=data)
     else: 
         # Means we didn't find the login info, so failed login
         # We create an error to pass to our html
@@ -62,7 +72,7 @@ def register():
 @app.route('/registerAuth', methods=['GET', 'POST'])
 def registerAuth():
     #grabs information from the forms
-    user_email = request.form['email']
+    user_email = request.form['userEmail']
     password = request.form['password']
 
     #cursor used to send queries
@@ -77,7 +87,7 @@ def registerAuth():
         cursor.close()
         return render_template('signup.html', error=error)
     else:
-        ins = 'INSERT INTO PERSON VALUES(%s. %s)'
+        ins = 'INSERT INTO PERSON VALUES(%s, SHA2(%s, 256))'
         cursor.execute(ins, (user_email, password))
 
         conn.commit()
@@ -86,21 +96,21 @@ def registerAuth():
 
 @app.route('/post',methods=['GET','POST'])
 def post():
-    user_email = session['email']
+    user_email = session['userEmail']
     cursor = conn.cursor()
     blog = request.form['blog']
-    query = 'INSERT INTO blog (blog_post, email) VALUES(%s, %s)'
-    cursor.execute(query,(blog,user_email))        
+    query = 'INSERT INTO ContentItem (email_post, item_name) VALUES(%s, %s)'
+    cursor.execute(query,(user_email, blog))        
     conn.commit()
     cursor.close()
     return redirect(url_for('home'))
 
 @app.route('/home')
 def home():
-    user_email = session['email']
+    user_email = session['userEmail']
+    query = "SELECT * FROM ContentItem WHERE is_pub = 1 AND post_time + INTERVAL 24 hour >= CURRENT_TIMESTAMP"
     cursor = conn.cursor()
-    query = 'SELECT ts, blog_post FROM blog WHERE email = %s ORDER BY ts DESC'
-    cursor.execute(query,(user_email))
+    cursor.execute(query)
     data = cursor.fetchall()
     cursor.close()
     return render_template('home.html', email=user_email, posts=data)
@@ -108,7 +118,7 @@ def home():
 
 @app.route('/logout')
 def logout():
-    session.pop('email')
+    session.pop('userEmail')
     return redirect('/')
 
 if __name__ == "__main__":
