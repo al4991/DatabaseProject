@@ -22,18 +22,19 @@ def index():
     return "You ain't logged in"
 
 
-@app.route('/login', methods=['GET', 'POST'])
+@app.route('/login')
 def login(): 
-    if request.method == 'GET':
-        return render_template('login.html')
-	# Get the info we have in the form
+    return render_template('login.html')
+
+@app.route('/loginAuth', methods=['GET', 'POST'])
+def loginAuth():
     user_email = request.form['email']
     password = request.form['password']
     # Set up cursor to prepare for executing queries
     cursor = conn.cursor()
     # Templating the query to check email and password
     # FOR THE FUTURE: we need to account for the fact that we will 
-    # be hashing passwords :) 
+    # be hashing passwords
     query = 'SELECT * FROM PERSON WHERE email = %s and password = %s'
     cursor.execute(query, (user_email, password))
     # Grab the row with email and password (if it exists)
@@ -43,25 +44,19 @@ def login():
 
     # Checking to see if the login info actually exists or not 
     if (data):
-    	# creates a session for the user
-    	# session['useremail'] = user_email
-    	# redirecting user to our main page
-    	# return redirect(url_for('/'))
-        error = "This user already exists"
-        cursor.close()
-        return render.template('signup.html',error=error)
+        # creates a session for the user
+        session['email'] = user_email
+        # redirecting user to our main page
+        # return redirect(url_for('/'))
+        return render.template('index.html')
     else: 
-    	# Means we didn't find the login info, so failed login
-    	# We create an error to pass to our html
-    	#flash("Something is wrong. Login failed")
-    	#error = "Invalid email or password"
-    	#return render_template('login.html', error=error)
-        ins = 'INSERT INTO user VALUES(%S, %S)'
-        cursor.execute(ins,(user_email,password))
-        conn.commit()
-        cursor.close()
-        return render_template('index.html')
-
+        # Means we didn't find the login info, so failed login
+        # We create an error to pass to our html
+        #flash("Something is wrong. Login failed")
+        #error = "Invalid email or password"
+        #return render_template('login.html', error=error)
+        error = "Invalid email or password"
+        return render_template('login.html', error=error)
 
 @app.route('/signup', methods=['GET', 'POST'])
 def signup(): 
