@@ -4,9 +4,12 @@
 <head>
 	<title> YEEEEEEEEEE </title>
 <head>
-    <h1>Welcome</h1>
-    <a href="{{ url_for('login') }}">Login</a>
-    <a href="{{ url_for('register') }}">Register</a>
+    <h1>Welcome {{userEmail}}</h1>
+    <form action = "/post" method = "POST">
+        <input type="text" name = "blog" placeholder="post" requried/> <br>
+        <input type="submit" value = "POST"/>
+    </form>
+    
     <style type="text/css">
     
     

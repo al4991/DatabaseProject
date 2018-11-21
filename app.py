@@ -8,7 +8,7 @@ app.secret_key = "Doesn'tMatterRn"
 # Setting up MySQL
 conn = pymysql.connect(host='localhost',
 	                 user='root',
-	                 password='',
+	                 password='root',
 	                 db='pricosha',
 	                 charset='utf8mb4',
 	                 cursorclass=pymysql.cursors.DictCursor)
