@@ -58,11 +58,35 @@ def loginAuth():
         error = "Invalid email or password"
         return render_template('login.html', error=error)
 
-@app.route('/signup', methods=['GET', 'POST'])
-def signup(): 
+@app.route('/register')
+def register(): 
 	return render_template('signup.html')
 
-    
+@app.route('/registerAuth', methods=['GET', 'POST'])
+def registerAuth():
+    #grabs information from the forms
+    user_email = request.form['email']
+    password = request.form['password']
+
+    #cursor used to send queries
+    cursor = conn.cursor()
+    #executes query
+    query = 'SELECT * FROM PERSON WHERE email = %s'
+    cursor.execute(query, (user_email))
+
+    data = cursor.fetchone()
+    if(data):
+        error = "This user already exists"
+        cursor.close()
+        return render_template('signup.html', error=error)
+    else:
+        ins = 'INSERT INTO PERSON VALUES(%s. %s)'
+        cursor.execute(ins, (user_email, password))
+
+        conn.commit()
+        cursor.close()
+        return render_template('index.html')
+
 @app.route('/post',methods=['GET','POST'])
 def post():
     user_email = session['email']
