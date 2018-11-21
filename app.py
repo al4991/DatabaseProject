@@ -9,17 +9,14 @@ app.secret_key = "Doesn'tMatterRn"
 conn = pymysql.connect(host='localhost',
 	                 user='root',
 	                 password='',
-	                 conn='pricosha',
+	                 db='pricosha',
 	                 charset='utf8mb4',
 	                 cursorclass=pymysql.cursors.DictCursor)
 
 
 @app.route("/")
 def index():
-    if 'email' in session:
-    	return 'Logged in as %s' % escape(session['email'])
-
-    return "You ain't logged in"
+    return render_template('index.html')
 
 
 @app.route('/login')
@@ -92,7 +89,7 @@ def post():
     user_email = session['email']
     cursor = conn.cursor()
     blog = request.form['blog']
-    query = 'INSERT INTO blog (blog_post,email) VALUES(%s, %s)'
+    query = 'INSERT INTO blog (blog_post, email) VALUES(%s, %s)'
     cursor.execute(query,(blog,user_email))        
     conn.commit()
     cursor.close()
