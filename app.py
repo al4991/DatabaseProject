@@ -51,11 +51,6 @@ def loginAuth():
         session['userEmail'] = user_email
         # redirecting user to our main page
         # return redirect(url_for('/'))
-        query = "SELECT * FROM ContentItem WHERE is_pub = 1 AND post_time + INTERVAL 24 hour >= CURRENT_TIMESTAMP"
-        cursor = conn.cursor()
-        cursor.execute(query)
-        data = cursor.fetchall()
-        cursor.close()
         return redirect(url_for('home'))
     else: 
         # Means we didn't find the login info, so failed login
