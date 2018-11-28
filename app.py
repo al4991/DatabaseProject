@@ -1,20 +1,10 @@
 from flask import Flask, render_template, session, redirect
 from flask import url_for, request
-from perm  import conn
-import pymysql.cursors
+from perm import conn
 
 app = Flask(__name__)
 app.secret_key = "Doesn'tMatterRn"
 
-# Setting up MySQL
-'''
-conn = pymysql.connect(host='localhost',
-                       user='root',
-                       password='',
-                       db='pricosha',
-                       charset='utf8mb4',
-                       cursorclass=pymysql.cursors.DictCursor)
-'''
 
 @app.route("/")
 def index():
@@ -102,7 +92,7 @@ def post():
     cursor = conn.cursor()
     blog = request.form['blog']
     query = 'INSERT INTO ContentItem (email_post, item_name) VALUES(%s, %s)'
-    cursor.execute(query,(user_email, blog))        
+    cursor.execute(query, (user_email, blog))
     conn.commit()
     cursor.close()
     return redirect(url_for('home'))
