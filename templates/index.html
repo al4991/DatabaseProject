@@ -37,6 +37,7 @@
         </tr>
     {% endfor %}
     </table>
-
-    <a href="/logout">Logout</a>
+    {% if email %}
+        <a href="/logout">Logout</a>
+    {% endif %}
 </html>
