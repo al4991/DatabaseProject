@@ -4,9 +4,14 @@
 <head>
 	<title> YEEEEEEEEEE </title>
 </head>
-    <h1>Welcome</h1>
-    <a href="{{ url_for('login') }}">Login</a>
-    <a href="{{ url_for('register') }}">Register</a>
+    <h1>Welcome
+    {% if email %} 
+        {{ email }} 
+    {% endif %}</h1>
+    {% if not email %}
+        <a href="{{ url_for('login') }}">Login</a>
+        <a href="{{ url_for('register') }}">Register</a>
+    {% endif %}
     <style type="text/css">
     
     
@@ -32,4 +37,6 @@
         </tr>
     {% endfor %}
     </table>
+
+    <a href="/logout">Logout</a>
 </html>

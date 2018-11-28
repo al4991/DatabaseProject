@@ -18,12 +18,20 @@ conn = pymysql.connect(host='localhost',
 
 @app.route("/")
 def index():
-    query = "SELECT * FROM ContentItem WHERE is_pub = 1 AND post_time + INTERVAL 24 hour >= CURRENT_TIMESTAMP"
     cursor = conn.cursor()
-    cursor.execute(query)
+    if 'userEmail' in session:
+        query = "SELECT * FROM ContentItem WHERE (is_pub = 1 AND post_time + INTERVAL 24 hour >= CURRENT_TIMESTAMP)" \
+            " OR email_post = (%s)"
+        cursor.execute(query, session['userEmail'])
+    else:
+        query = "SELECT * FROM ContentItem WHERE is_pub = 1 AND post_time + INTERVAL 24 hour >= CURRENT_TIMESTAMP"
+        cursor.execute(query)
     data = cursor.fetchall()
     cursor.close()
-    return render_template('index.html', posts=data)
+    if 'userEmail' in session:
+        return render_template('index.html', posts=data, email=session['userEmail'])
+    else:
+        return render_template('index.html', posts=data)
 
 
 @app.route('/login')
@@ -53,7 +61,7 @@ def loginAuth():
         session['userEmail'] = user_email
         # redirecting user to our main page
         # return redirect(url_for('/'))
-        return redirect(url_for('home'))
+        return redirect(url_for('index'))
     else: 
         # Means we didn't find the login info, so failed login
         # We create an error to pass to our html
@@ -105,19 +113,7 @@ def post():
     cursor.execute(query,(user_email, blog))        
     conn.commit()
     cursor.close()
-    return redirect(url_for('home'))
-
-
-@app.route('/home')
-def home():
-    user_email = session['userEmail']
-    query = "SELECT * FROM ContentItem WHERE (is_pub = 1 AND post_time + INTERVAL 24 hour >= CURRENT_TIMESTAMP)" \
-            " OR email_post = (%s)"
-    cursor = conn.cursor()
-    cursor.execute(query, user_email)
-    data = cursor.fetchall()
-    cursor.close()
-    return render_template('home.html', email=user_email, posts=data)
+    return redirect(url_for('index'))
 
 
 @app.route('/logout')
