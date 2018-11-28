@@ -1,18 +1,20 @@
 from flask import Flask, render_template, session, redirect
 from flask import url_for, request
+from perm  import conn
 import pymysql.cursors
 
 app = Flask(__name__)
 app.secret_key = "Doesn'tMatterRn"
 
 # Setting up MySQL
+'''
 conn = pymysql.connect(host='localhost',
                        user='root',
                        password='',
                        db='pricosha',
                        charset='utf8mb4',
                        cursorclass=pymysql.cursors.DictCursor)
-
+'''
 
 @app.route("/")
 def index():
