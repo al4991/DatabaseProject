@@ -9,6 +9,7 @@ app.secret_key = "Doesn'tMatterRn"
 conn = pymysql.connect(host='localhost',
                        user='root',
                        password='root',
+                       port = 8889,
                        db='pricosha',
                        charset='utf8mb4',
                        cursorclass=pymysql.cursors.DictCursor)
@@ -106,9 +107,9 @@ def post():
 @app.route('/home')
 def home():
     user_email = session['userEmail']
-    query = "SELECT * FROM ContentItem WHERE is_pub = 1 AND post_time + INTERVAL 24 hour >= CURRENT_TIMESTAMP"
+    query = "SELECT * FROM ContentItem WHERE (is_pub = 1 AND post_time + INTERVAL 24 hour >= CURRENT_TIMESTAMP) OR email_post = (%s)"
     cursor = conn.cursor()
-    cursor.execute(query)
+    cursor.execute(query, user_email)
     data = cursor.fetchall()
     cursor.close()
     return render_template('home.html', email=user_email, posts=data)
