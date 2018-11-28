@@ -4,5 +4,8 @@
 	<br><input type="text" name="userEmail" placeholder="email" required></br>
 	<br><input type="password" name="password" placeholder="password" required></br>
 	<input type="submit" value="Sign Up">
+	{% if error %}
+	    <p class="error"><strong>Error:</strong> {{ error }}</p>
+	{% endif %}
 </form> 
 <a class="btn" href="{{ url_for('index') }}"><button>Cancel</button></a>
