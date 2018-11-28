@@ -8,8 +8,7 @@ app.secret_key = "Doesn'tMatterRn"
 # Setting up MySQL
 conn = pymysql.connect(host='localhost',
                        user='root',
-                       password='root',
-                       port = 8889,
+                       password='',
                        db='pricosha',
                        charset='utf8mb4',
                        cursorclass=pymysql.cursors.DictCursor)
@@ -70,8 +69,11 @@ def register():
 @app.route('/registerAuth', methods=['GET', 'POST'])
 def registerAuth():
     # grabs information from the forms
+    fname = request.form['fname']
+    lname = request.form['lname']
     user_email = request.form['userEmail']
     password = request.form['password']
+
     # cursor used to send queries
     cursor = conn.cursor()
     # executes query
@@ -84,8 +86,8 @@ def registerAuth():
         cursor.close()
         return render_template('signup.html', error=error)
     else:
-        ins = 'INSERT INTO PERSON VALUES(%s, SHA2(%s, 256))'
-        cursor.execute(ins, (user_email, password))
+        ins = 'INSERT INTO PERSON VALUES(%s, SHA2(%s, 256), %s, %s)'
+        cursor.execute(ins, (user_email, password, fname, lname))
 
         conn.commit()
         cursor.close()
@@ -107,7 +109,8 @@ def post():
 @app.route('/home')
 def home():
     user_email = session['userEmail']
-    query = "SELECT * FROM ContentItem WHERE (is_pub = 1 AND post_time + INTERVAL 24 hour >= CURRENT_TIMESTAMP) OR email_post = (%s)"
+    query = "SELECT * FROM ContentItem WHERE (is_pub = 1 AND post_time + INTERVAL 24 hour >= CURRENT_TIMESTAMP)" \
+            " OR email_post = (%s)"
     cursor = conn.cursor()
     cursor.execute(query, user_email)
     data = cursor.fetchall()
