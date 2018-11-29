@@ -1,43 +1,154 @@
 <!DOCTYPE html> 
-<html lang="en">
+<html>
 
 <head>
-	<title> YEEEEEEEEEE </title>
+   <!--  <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='css/index.css') }}"> -->
+   <style type="text/css">
+       html,body {
+        color: black;
+        padding-top: 15px;
+        padding-left: 20px;
+        padding-right: 20px;
+       }
+
+       #container {
+        width:100%;
+       }
+
+       #leftColumn {
+         position: absolute;
+        left: 0px;
+        width: 30%;
+       }
+
+       #rightColumn {
+        position: absolute;
+        right: 0px;
+        width: 70%;
+        }
+
+        table,th, td {
+            border: 1px solid white;
+            background: #b19cd9;
+        }
+
+        #postTable {
+            margin-top:20px;
+            margin-left:40px;
+        }
+
+        a {
+            text-decoration: none;
+            /*position: absolute;*/
+            /*right: 200px;*/
+            background: #b2d0ff;
+            transition: 0.3s;
+            color: white;
+            border-top: 10px solid #b2d0ff;
+            border-right: 10px solid #b2d0ff;
+            border-bottom: 10px solid #b2d0ff;
+            border-left: 10px solid #b2d0ff;
+        }
+        a:hover {
+            background:#85b1f7;
+            border-top: 10px solid #85b1f7;
+            border-right: 10px solid #85b1f7;
+            border-bottom: 10px solid #85b1f7;
+            border-left: 10px solid #85b1f7;
+        }
+
+        a#loginButton,
+        a#logoutButton {
+            /*float:right;*/
+            position:absolute;
+            top:70px;
+            right:100px;
+
+        }
+        a#registerButton {
+            position: absolute;
+            top: 70px;
+            right: 170px;
+
+        }
+
+        #myGroup, #memberGroups {
+            text-align: center;
+            border: 3px solid #b19cd9 ;
+            margin: 20px;
+
+        }
+        h1 {
+            text-align: center;
+        }
+
+
+
+      /* #leftColumn {
+        width: 30%;
+       }
+
+       #rightColumn {
+        width: 70%;
+       }*/
+   </style>
+
+    <title> YEEEEEEEEEE </title>
 </head>
     <h1>Welcome
     {% if email %} 
         {{ email }} 
-    {% endif %}</h1>
+    {% endif %}!</h1>
     {% if not email %}
-        <a href="{{ url_for('login') }}">Login</a>
-        <a href="{{ url_for('register') }}">Register</a>
-    {% endif %}
-    <style type="text/css">
-    
-    
-        table,th, td {
-            border: 1px solid black;
-        }
-    </style>
-    
-    <table>
-        <th>ID</th>
-        <th>Email</th>
-        <th>Time</th>
-        <th>File Path</th>
-        <th>Post</th>
+        <a href="{{ url_for('login') }}" id="loginButton">Login</a>
+        <a href="{{ url_for('register') }}" id="registerButton">Register</a>
+
         
-    {% for line in posts %}
-        <tr>
-            <td>{{ line.item_id }}</td>
-            <td>{{ line.email_post }}</td>
-            <td>{{ line.post_time }}</td>
-            <td>{{ line.file_path }}</td>
-            <td>{{ line.item_name }}</td>
-        </tr>
-    {% endfor %}
-    </table>
-    {% if email %}
-        <a href="/logout">Logout</a>
     {% endif %}
+    <body>
+        <div id="container">
+            {% if email %}
+            <div id="leftColumn">
+                <div id="myGroup">
+                    <h3>My Groups</h3>
+                    {% for line in ownedGroups %}
+                    <ul> {{line.fg_name}} </ul>
+                    {% endfor %}
+                </div>
+
+                <div id="memberGroups">
+                    <h3>Member</h3>
+                    {% for line in memberGroups %}
+                        <ul> {{line.fg_name}} </ul>
+                    {% endfor %}
+                </div>
+                
+            </div>
+            {% endif %}
+
+            <div id="rightColumn">
+            <table id="postTable">
+                <th>ID</th>
+                <th>Email</th>
+                <th>Time</th>
+                <th>File Path</th>
+                <th>Post</th>
+                
+            {% for line in posts %}
+                <tr>
+                    <td>{{ line.item_id }}</td>
+                    <td>{{ line.email_post }}</td>
+                    <td>{{ line.post_time }}</td>
+                    <td>{{ line.file_path }}</td>
+                    <td>{{ line.item_name }}</td>
+                </tr>
+            {% endfor %}
+            </table>
+             </div>
+        </div>
+        {% if email %}
+            <a href="/logout" id="logoutButton">Logout</a>
+        {% endif %}
+
+    </body>
 </html>
