@@ -2,7 +2,9 @@ from flask import Flask, render_template, session, redirect
 from flask import url_for, request
 from perm import conn
 
+
 app = Flask(__name__)
+app.static_folder = 'static'
 app.secret_key = "Doesn'tMatterRn"
 
 
@@ -13,13 +15,27 @@ def index():
         query = "SELECT * FROM ContentItem WHERE (is_pub = 1 AND post_time + INTERVAL 24 hour >= CURRENT_TIMESTAMP)" \
             " OR email_post = (%s)"
         cursor.execute(query, session['userEmail'])
+
+        
     else:
         query = "SELECT * FROM ContentItem WHERE is_pub = 1 AND post_time + INTERVAL 24 hour >= CURRENT_TIMESTAMP"
         cursor.execute(query)
     data = cursor.fetchall()
+    cursor.rownumber = 0
+    if 'userEmail' in session: 
+        friendQuery = "SELECT fg_name FROM FriendGroup WHERE owner_email = (%s)"
+        # print("friendQuery results are" + friendQuery)
+        cursor.execute(friendQuery,session['userEmail'])
+    friendData = cursor.fetchall()
+    cursor.rownumber = 0
+    if 'userEmail' in session:
+        memberQuery = "SELECT fg_name FROM Belong WHERE email = (%s) AND owner_email != (%s)"
+        useremail = session['userEmail']
+        cursor.execute(memberQuery,(useremail,useremail))
+    memberData = cursor.fetchall();
     cursor.close()
     if 'userEmail' in session:
-        return render_template('index.html', posts=data, email=session['userEmail'])
+        return render_template('index.html', ownedGroups = friendData, memberGroups = memberData, posts=data, email=session['userEmail'])
     else:
         return render_template('index.html', posts=data)
 
