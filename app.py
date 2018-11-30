@@ -148,18 +148,14 @@ def createNewGroup():
     if groupData:
         cursor.rownumber = 0
         error = "You have already created a group with this name"
-        displayNewGroup = "true"
-        return render_template('newGroup.html', displayNewGroup=displayNewGroup, error=error)
+        return render_template('newGroup.html', displayNewGroup="true", error=error)
     else:
         newGroupQuery = 'INSERT INTO FriendGroup(owner_email,fg_name,description) VALUES (%s,%s,%s)'
         cursor.execute(newGroupQuery, (user_email, groupName, groupDesc))
         cursor.rownumber = 0
         if request.form.get('AddMember') == 'AddMember':
-            displayAddMember = "true"
-            return render_template('newGroup.html', displayAddMember=displayAddMember, dispGroupName=groupName)
-
-    # YOU NEED TO FIX THIS TO ACTUALLY CREATE A GROUP
-    return render_template('newGroup.html', displayNewGroup='true')  # fix so it goes back to home.
+            return render_template('newGroup.html', displayAddMember="true", dispGroupName=groupName)
+    return redirect(url_for('index'))
    
     # newMemberQuery = 'INSERT INTO Belong (email,owner_email,fg_name) VALUES (%s,%s,%s)'
     # cursor.execute(newMemberQuery,(newMember,user_email,groupName))
@@ -187,25 +183,22 @@ def addNewMember():
         # if they're already in your group send an error message
         if memExistData:
             cursor.rownumber = 0
-            displayAddMember = "true"
             error = "This person is already in your group"
-            return render_template('newGroup.html', displayAddMember=displayAddMember, dispGroupName=groupName,
+            return render_template('newGroup.html', displayAddMember="true", dispGroupName=groupName,
                                    error=error)
         else:
             # member exists and is not in group so add the to your group
             cursor.rownumber = 0
             addMemberQuery = 'INSERT INTO Belong (email, owner_email, fg_name) VALUES (%s,%s,%s)'
             cursor.execute(addMemberQuery, (newMember, user_email, groupName))
-            displayAddMember = "true"
             message = "You successfully added a member"
-            return render_template('newGroup.html', displayAddMember=displayAddMember, dispGroupName=groupName,
+            return render_template('newGroup.html', displayAddMember="true", dispGroupName=groupName,
                                    message=message)
     # member doesn't exist
     else:
         cursor.rownumber = 0
-        displayAddMember = "true"
         error = "This person does not exist, try another email"
-        return render_template('newGroup.html', displayAddMember=displayAddMember, dispGroupName=groupName,
+        return render_template('newGroup.html', displayAddMember="true", dispGroupName=groupName,
                                error=error)
 
     checkMemQuery = 'SELECT email FROM Belong WHERE owner_email =(%s) AND fg_name = (%s)'
