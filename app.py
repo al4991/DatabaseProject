@@ -49,12 +49,17 @@ def index():
         cursor.execute(query, (session['userEmail']))
     rate_data = cursor.fetchall()
 
+    cursor.rownumber = 0
+    query = "SELECT item_id, emoji, count(*) AS emoji_count FROM Rate GROUP BY item_id, emoji"
+    cursor.execute(query)
+    rate_stats = cursor.fetchall()
+
     cursor.close()
     if 'userEmail' in session:
         return render_template('index.html', ownedGroups=friendData, memberGroups=memberData, posts=data,
-                               rates=rate_data, email=session['userEmail'])
+                               rates=rate_data, rate_stats = rate_stats, email=session['userEmail'])
     else:
-        return render_template('index.html', posts=data)
+        return render_template('index.html', posts=data, rate_stats = rate_stats)
 
 
 @app.route('/login')

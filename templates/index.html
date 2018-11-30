@@ -228,6 +228,7 @@
                     <th>Time</th>
                     <th>File Path</th>
                     <th>Post</th>
+                    <th>Ratings</th>
                 {% if email %}
                     <th>My Rating</th>
                 {% endif %}
@@ -240,6 +241,14 @@
                         <td>{{ line.post_time }}</td>
                         <td>{{ line.file_path }}</td>
                         <td>{{ line.item_name }}</td>
+                        <td>
+                            {% for rating in rate_stats %}
+                                {% if rating.item_id == line.item_id %}
+                                    &#{{ rating.emoji }};
+                                    {{ rating.emoji_count }}
+                                {% endif %}
+                            {% endfor %}
+                        </td>
                         {% if email %}
                             <td>
                                     <input type="radio" name="rate{{ line.item_id}}" value="x1F44C" onclick="submitForm()">&#x1F44C;
@@ -247,7 +256,7 @@
                                     <input type="radio" name="rate{{ line.item_id}}" value="x1F606" onclick="submitForm()">&#x1F606;
                                     <input type="radio" name="rate{{ line.item_id}}" value="x1F62E" onclick="submitForm()">&#x1F62E;
                                     <input type="radio" name="rate{{ line.item_id}}" value="x1F622" onclick="submitForm()">&#x1F622;
-                                    <input type="radio" name="rate{{ line.item_id}}" value="x1F621" onclick="submitForm()">&#x1F44C;
+                                    <input type="radio" name="rate{{ line.item_id}}" value="x1F621" onclick="submitForm()">&#x1F621;
                                     {% for rate in rates %}
                                         {% if rate.item_id == line.item_id %}
                                             {% if rate.emoji == "x1F44C" %}
