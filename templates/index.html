@@ -126,11 +126,37 @@
             color: gray;
             background: white;
             border:0;
-            right:45px;
+            right:85px;
             margin-top:-40px;
             transition: 1s;
         }
         button#addMemberButton:hover {
+            color:white;
+            background: gray;
+        }
+
+
+        button#removeMemButton:hover {
+            color: white;
+            background: gray;
+        }
+
+        a#removeMemButton.btn {
+            float:right;
+            border:0;
+        }
+
+        button#removeMemButton {
+            position: absolute;
+            border:none;
+            color: gray;
+            background: white;
+            border:0;
+            right:45px;
+            margin-top:-40px;
+            transition: 1s;
+        }
+        button#removeMemButton:hover {
             color:white;
             background: gray;
         }
@@ -169,6 +195,7 @@
                     <ul> {{line.fg_name}} </ul>
                     <a id="addMemberButton" class="btn" href="{{ url_for('addMember', nameGroup=line.fg_name) }}">
                         <button id="addMemberButton"> + </button></a>
+                    <a id ="removeMemButton" class="btn" href="{{ url_for('removeMember', nameGroup=line.fg_name) }}"> <button id="removeMemButton"> - </button></a> 
                     {% endfor %}
                 </div>
 
