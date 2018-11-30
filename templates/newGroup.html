@@ -1,31 +1,94 @@
 <!DOCTYPE html>
 <html>
 <head>
+	<link href="https://fonts.googleapis.com/css?family=Oswald" rel="stylesheet">
+	<style type="text/css">
+		html,body {
+			font-family: 'Oswald', sans-serif;
+		}
+		html, body {
+			text-align: center;
+		}
+		a#Home {
+			position: absolute;
+			left:0;
+			margin-left:10px;
+			text-decoration: none;
+			background: #b19cd9;
+			color:white;
+			border: 5px solid #b19cd9;
+		}
+
+		a#Home:hover {
+			color: #b19cd9;
+			background: white;
+			border: 5px solid white;
+		}
+
+		#addMemButton {
+			border: none;
+   			color: white;
+   			background:#b19cd9;
+   			border: 5px solid #b19cd9;
+   			margin: 4px;
+		}
+		#holder, #holder02 {
+			/*width:200px;*/
+			display: inline-block;
+			padding:10px;
+			border: 10px solid #b19cd9;
+		}
+
+		a#Home02 {
+			text-decoration: none;
+			background: #b19cd9;
+			color:white;
+			border: 3px solid #b19cd9;
+			borer-top:1px solid #b19cd9;
+			padding:3px;
+		}
+		
+		input#nameInput {
+			position: relative;
+			top:-20px;
+		}
+
+		input#addMemButton02 {
+			border:none;
+			background: #b19cd9;
+			color:white;
+			border: 5px solid #b19cd9;
+			padding:3px;
+		}
+	</style>
 	<title>Creating a Group</title>
 </head>
 <body>
 	<div id="container">
+		<a href="{{ url_for('index') }}" id="Home">Return Home</a>
 		<form action="/createNewGroup" method="POST">
-			<a href="{{ url_for('index') }}" id="Home">Return Home</a>
 			{% if displayNewGroup%}
+			<div id="holder">
 			<br><input type="text" name="groupName" placeholder="Name of Group" required/>
 			<br><input type="text" name="groupDesc" placeholder="Description of Group" required/>
-			<input type="submit" value="AddMember" name="AddMember"/>
+			<br><input type="submit" value="AddMember" name="AddMember" id="addMemButton" />
 			{% if error %}
 	    		<p class="error"><strong>Error:</strong> {{ error }}</p>
 			{% endif %}
 			{% endif %}
+			</div>
 		</form>
 
 		<form action="/addNewMember" method="POST">
 			{% if displayAddMember%}
+			<div id="holder02">
 			<h2>Add Members to
         {{ dispGroupName }} </h2>
 			<br>
 			<input type="hidden" name="groupName" value="{{ dispGroupName }}">
-			<input type="text" name="newMember" placeholder="add group member with email" required>
-			<a href="{{ url_for('index') }}" id="Home">Done!</a>
-			<input type="submit" name="submit_button" value="Add Member to Group">
+			<input type="text" name="newMember" placeholder="add group member with email" id="nameInput"required>
+			<br><a href="{{ url_for('index') }}" id="Home02">Done!</a>
+			<input type="submit" name="submit_button" value="Add Member to Group" id="addMemButton02">
 
 			{% if error %}
 	    		<p class="error"><strong>Error:</strong> {{ error }}</p>
@@ -36,6 +99,7 @@
 			{% if message%}
 				<p class="message"><strong>Message:</strong> {{ message }} </p>
 			{% endif %}
+			</div>
 		</form>
 		
 

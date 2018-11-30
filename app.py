@@ -28,7 +28,7 @@ def index():
         cursor.execute(friendQuery, session['userEmail'])
     friendData = cursor.fetchall()
     cursor.rownumber = 0
-    # adding name of gorup that you are apart of 
+    # adding name of group that you are apart of 
     if 'userEmail' in session:
         memberQuery = "SELECT fg_name FROM Belong WHERE email = (%s) AND owner_email != (%s)"
         useremail = session['userEmail']
