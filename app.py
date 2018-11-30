@@ -141,10 +141,10 @@ def newGroup():
     displayNewGroup = "true"
     return render_template('newGroup.html', displayNewGroup=displayNewGroup)
 
+
 @app.route('/addMember/<nameGroup>')
 def addMember(nameGroup):
-    return render_template('newGroup.html',displayAddMember="true",dispGroupName=nameGroup)
-
+    return render_template('newGroup.html', displayAddMember="true", dispGroupName=nameGroup)
 
 
 @app.route('/createNewGroup', methods=['GET', 'POST'])
@@ -170,7 +170,6 @@ def createNewGroup():
             return render_template('newGroup.html', displayAddMember="true", dispGroupName=groupName)
     return redirect(url_for('index'))
    
-
 
 @app.route('/addNewMember', methods=['GET', 'POST'])
 def addNewMember():
