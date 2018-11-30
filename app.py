@@ -1,8 +1,11 @@
 import os
+import re
 from flask import Flask, render_template, session, redirect
 from flask import url_for, request
 from perm import conn
 
+RATE_RE = "(rate[0-9]+)"
+rate_match = re.compile(RATE_RE)
 
 app = Flask(__name__)
 app.static_folder = 'static'
@@ -39,10 +42,17 @@ def index():
         useremail = session['userEmail']
         cursor.execute(memberQuery, (useremail, useremail))
     memberData = cursor.fetchall()
+
+    cursor.rownumber = 0
+    if 'userEmail' in session:
+        query = "SELECT item_id, emoji FROM Rate WHERE email = %s"
+        cursor.execute(query, (session['userEmail']))
+    rate_data = cursor.fetchall()
+
     cursor.close()
     if 'userEmail' in session:
         return render_template('index.html', ownedGroups=friendData, memberGroups=memberData, posts=data,
-                               email=session['userEmail'])
+                               rates=rate_data, email=session['userEmail'])
     else:
         return render_template('index.html', posts=data)
 
@@ -259,6 +269,27 @@ def addNewMember():
     #     cursor.rownumber = 0
     #     error = "This person is already in your group"
 
+@app.route('/rate', methods=['GET', 'POST'])
+def rate():
+    user_email = session['userEmail']
+    cursor = conn.cursor()
+    for item in request.form:
+        if re.match(rate_match, item):
+            cursor.rownumber = 0
+            rate_id = int(item.split('e')[-1])
+            query = "SELECT * FROM Rate WHERE item_id = (%s) AND email = (%s)"
+            cursor.execute(query, (rate_id, user_email))
+            rate_exist = cursor.fetchone()
+            cursor.rownumber = 0
+            if rate_exist:
+                query = "UPDATE Rate SET rate_time = CURRENT_TIMESTAMP, emoji = (%s) WHERE item_id = (%s) AND email = (%s)"
+                cursor.execute(query, (request.form[item], rate_id, user_email))
+            else:
+                query = "INSERT INTO Rate(email, item_id, rate_time, emoji) VALUES(%s, %s, CURRENT_TIMESTAMP, %s);"
+                cursor.execute(query, (user_email, rate_id, request.form[item]))
+            conn.commit()
+    cursor.close()
+    return redirect(url_for('index'))
 
 if __name__ == "__main__":
     app.run('127.0.0.1', 5000, debug=True)

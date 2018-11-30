@@ -202,9 +202,10 @@
                     <th>File Path</th>
                     <th>Post</th>
                 {% if email %}
-                    <th>Rating</th>
+                    <th>My Rating</th>
                 {% endif %}
 
+                <form id="rate_form" action="/rate" method="POST">
                 {% for line in posts %}
                     <tr>
                         <td>{{ line.item_id }}</td>
@@ -214,10 +215,51 @@
                         <td>{{ line.item_name }}</td>
                         {% if email %}
                             <td>
+                                    <input type="radio" name="rate{{ line.item_id}}" value="x1F44C" onclick="submitForm()">&#x1F44C;
+                                    <input type="radio" name="rate{{ line.item_id}}" value="x1F496" onclick="submitForm()">&#x1F496;
+                                    <input type="radio" name="rate{{ line.item_id}}" value="x1F606" onclick="submitForm()">&#x1F606;
+                                    <input type="radio" name="rate{{ line.item_id}}" value="x1F62E" onclick="submitForm()">&#x1F62E;
+                                    <input type="radio" name="rate{{ line.item_id}}" value="x1F622" onclick="submitForm()">&#x1F622;
+                                    <input type="radio" name="rate{{ line.item_id}}" value="x1F621" onclick="submitForm()">&#x1F44C;
+                                    {% for rate in rates %}
+                                        {% if rate.item_id == line.item_id %}
+                                            {% if rate.emoji == "x1F44C" %}
+                                                <script>
+                                                    document.getElementsByName("rate{{ line.item_id}}")[0].checked = true;
+                                                </script>
+                                            {% elif rate.emoji == "x1F496" %}
+                                                <script>
+                                                    document.getElementsByName("rate{{ line.item_id}}")[1].checked = true;
+                                                </script>
+                                            {% elif rate.emoji == "x1F606" %}
+                                                 <script>
+                                                    document.getElementsByName("rate{{ line.item_id}}")[2].checked = true;
+                                                </script>
+                                            {% elif rate.emoji == "x1F62E" %}
+                                                <script>
+                                                    document.getElementsByName("rate{{ line.item_id}}")[3].checked = true;
+                                                </script>
+                                            {% elif rate.emoji == "x1F622" %}
+                                                <script>
+                                                    document.getElementsByName("rate{{ line.item_id}}")[4].checked = true;
+                                                </script>
+                                            {% elif rate.emoji == "x1F621" %}
+                                                <script>
+                                                    document.getElementsByName("rate{{ line.item_id}}")[5].checked = true;
+                                                </script>
+                                            {% endif %}
+                                        {% endif %}
+                                    {% endfor %}
+                                <script>
+                                    function submitForm(){
+                                        document.getElementById("rate_form").submit();
+                                    }
+                                </script>
                             </td>
                         {% endif %}
                     </tr>
                 {% endfor %}
+                </form>
                 </table>
              </div>
         </div>
