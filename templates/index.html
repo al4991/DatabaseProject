@@ -167,7 +167,8 @@
                     <a class="btn" href="{{ url_for('newGroup') }}"><button id="newGroupButton"> + </button></a>
                     {% for line in ownedGroups %}
                     <ul> {{line.fg_name}} </ul>
-                    <a id="addMemberButton" class="btn" href="{{ url_for('addMember', nameGroup=line.fg_name) }}"><button id="addMemberButton"> + </button></a>
+                    <a id="addMemberButton" class="btn" href="{{ url_for('addMember', nameGroup=line.fg_name) }}">
+                        <button id="addMemberButton"> + </button></a>
                     {% endfor %}
                 </div>
 
@@ -185,9 +186,10 @@
                 {% if email %}
 
                  <div>
-                    <form action="/post" method="POST">
+                    <form action="/post" method="POST" enctype="multipart/form-data">
                         <br><input type="text" name="content" placeholder="Post" required/>
                         <input type="checkbox" name="pub" ></br>
+                        <input type="file" name="image" accept="image/*" multiple>
                         <br><input type="submit" value=Post /></br>
                     </form>
                  </div>
