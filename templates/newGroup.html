@@ -6,13 +6,11 @@
 <body>
 	<div id="container">
 		<form action="/createNewGroup" method="POST">
+			<a href="{{ url_for('index') }}" id="Home">Return Home</a>
 			{% if displayNewGroup%}
 			<br><input type="text" name="groupName" placeholder="Name of Group" required/>
 			<br><input type="text" name="groupDesc" placeholder="Description of Group" required/>
-			<div id="buttons">
-				<a class="btn" href="{{ url_for('index') }}"><button>Cancel</button></a>
-				<input type="submit" value="AddMember" name="AddMember"/>
-			</div>
+			<input type="submit" value="AddMember" name="AddMember"/>
 			{% if error %}
 	    		<p class="error"><strong>Error:</strong> {{ error }}</p>
 			{% endif %}
@@ -26,10 +24,8 @@
 			<br>
 			<input type="hidden" name="groupName" value="{{ dispGroupName }}">
 			<input type="text" name="newMember" placeholder="add group member with email" required>
-			<div id="buttons2">
-				<a class="btn" href="{{ url_for('index') }}"><button>Cancel</button></a>
-				<input type="submit" name="submit_button" value="Add Member to Group">
-			</div>
+			<a href="{{ url_for('index') }}" id="Home">Done!</a>
+			<input type="submit" name="submit_button" value="Add Member to Group">
 
 			{% if error %}
 	    		<p class="error"><strong>Error:</strong> {{ error }}</p>
