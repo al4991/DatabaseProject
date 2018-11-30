@@ -199,6 +199,9 @@
                     <th>Time</th>
                     <th>File Path</th>
                     <th>Post</th>
+                {% if email %}
+                    <th>Rating</th>
+                {% endif %}
 
                 {% for line in posts %}
                     <tr>
@@ -207,6 +210,10 @@
                         <td>{{ line.post_time }}</td>
                         <td>{{ line.file_path }}</td>
                         <td>{{ line.item_name }}</td>
+                        {% if email %}
+                            <td>
+                            </td>
+                        {% endif %}
                     </tr>
                 {% endfor %}
                 </table>
