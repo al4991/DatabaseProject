@@ -81,7 +81,39 @@
         h1 {
             text-align: center;
         }
+        h3 {
+            display: inline-block;
+        }
+        a.btn{
+            float: right;
+            margin-right: 10px solid white;
+            margin-top: 15px solid white;
+            border:0;
 
+        }
+        a.btn:hover {
+            border:0;
+            margin-right: 10px solid white;
+            margin-top: 15px solid white;
+        }
+        button#newGroupButton {
+           position: absolute;
+
+            border:none;
+            color:gray;
+            background: white;
+            border:0;
+            right:40px;
+            top:40px;
+            /*margin-left: 15px solid white;
+            margin-top: 30px solid white;*/
+            font-size:20px;
+        }
+
+        button#newGroupButton:hover {
+            color: white;
+            background: gray;
+        }
 
 
       /* #leftColumn {
@@ -111,6 +143,7 @@
             <div id="leftColumn">
                 <div id="myGroup">
                     <h3>My Groups</h3>
+                    <a class="btn" href="{{ url_for('newGroup') }}"><button id="newGroupButton"> + </button></a>
                     {% for line in ownedGroups %}
                     <ul> {{line.fg_name}} </ul>
                     {% endfor %}
