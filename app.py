@@ -114,9 +114,15 @@ def registerAuth():
 def post():
     user_email = session['userEmail']
     cursor = conn.cursor()
-    blog = request.form['blog']
-    query = 'INSERT INTO ContentItem (email_post, item_name) VALUES(%s, %s)'
-    cursor.execute(query, (user_email, blog))
+    blog = request.form['content']
+    pub = request.form.get('pub')
+    if pub:
+        pub = True
+    else:
+        pub = False
+
+    query = 'INSERT INTO ContentItem(email_post, item_name, is_pub) VALUES(%s, %s, %s)'
+    cursor.execute(query, (user_email, blog, pub))
     conn.commit()
     cursor.close()
     return redirect(url_for('index'))

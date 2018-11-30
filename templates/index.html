@@ -155,28 +155,39 @@
                         <ul> {{line.fg_name}} </ul>
                     {% endfor %}
                 </div>
-                
             </div>
+
             {% endif %}
 
             <div id="rightColumn">
-            <table id="postTable">
-                <th>ID</th>
-                <th>Email</th>
-                <th>Time</th>
-                <th>File Path</th>
-                <th>Post</th>
-                
-            {% for line in posts %}
-                <tr>
-                    <td>{{ line.item_id }}</td>
-                    <td>{{ line.email_post }}</td>
-                    <td>{{ line.post_time }}</td>
-                    <td>{{ line.file_path }}</td>
-                    <td>{{ line.item_name }}</td>
-                </tr>
-            {% endfor %}
-            </table>
+                {% if email %}
+
+                 <div>
+                    <form action="/post" method="POST">
+                        <br><input type="text" name="content" placeholder="Post" required/>
+                        <input type="checkbox" name="pub" ></br>
+                        <br><input type="submit" value=Post /></br>
+                    </form>
+                 </div>
+
+                {% endif %}
+                <table id="postTable">
+                    <th>ID</th>
+                    <th>Email</th>
+                    <th>Time</th>
+                    <th>File Path</th>
+                    <th>Post</th>
+
+                {% for line in posts %}
+                    <tr>
+                        <td>{{ line.item_id }}</td>
+                        <td>{{ line.email_post }}</td>
+                        <td>{{ line.post_time }}</td>
+                        <td>{{ line.file_path }}</td>
+                        <td>{{ line.item_name }}</td>
+                    </tr>
+                {% endfor %}
+                </table>
              </div>
         </div>
         {% if email %}
