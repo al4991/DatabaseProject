@@ -1,3 +1,4 @@
+import os
 from flask import Flask, render_template, session, redirect
 from flask import url_for, request
 from perm import conn
@@ -7,6 +8,10 @@ app = Flask(__name__)
 app.static_folder = 'static'
 app.secret_key = "Doesn'tMatterRn"
 
+# APP_ROOT = os.path.dirname(os.path.abspath(__file__))
+
+UPLOAD_FOLDER = os.path.basename('images')
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 @app.route("/")
 def index():
@@ -118,16 +123,56 @@ def post():
     cursor = conn.cursor()
     blog = request.form['content']
     pub = request.form.get('pub')
-    if pub:
-        pub = True
-    else:
-        pub = False
+    file = request.files.getlist('image')
+    if file:
+        target = app.config['UPLOAD_FOLDER']
+        if not os.path.isdir(target):
+            os.mkdir(target)
+        for file in request.files.getlist('image'):
+            print(file)
+            filename = file.filename
+            destination = "/".join([target, filename])
+            print(destination)
 
-    query = 'INSERT INTO ContentItem(email_post, item_name, is_pub) VALUES(%s, %s, %s)'
-    cursor.execute(query, (user_email, blog, pub))
+    else:
+        destination = 'NULL'
+
+    pub = True if pub else False
+    # if pub:
+    #     pub = True
+    # else:
+    #     pub = False
+
+    query = 'INSERT INTO ContentItem(email_post, file_path, item_name, is_pub) VALUES(%s, %s, %s, %s)'
+    cursor.execute(query, (user_email, destination, blog, pub))
+    if file:
+        file.save(destination)
     conn.commit()
     cursor.close()
     return redirect(url_for('index'))
+
+#
+# @app.route('/upload', methods=['POST'])
+# def upload():
+#     target = app.config['UPLOAD_FOLDER']
+#     print(target)
+#     if not os.path.isdir(target):
+#         os.mkdir(target)
+#
+#     for file in request.files.getlist('image'):
+#         print(file)
+#         filename = file.filename
+#         destination = "/".join([target, filename])
+#         print(destination)
+#         file.save(destination)
+#     return redirect(url_for('index'))
+#
+#     # file = request.files['image']
+#     # f = os.path.join(app.config['UPLOAD_FOLDER', file.filename])
+#     # # There should be stuff to check that what we uploaded was actually an image, not malware
+#     #
+#     # file.save(f)
+    # return render_template('index.html')
 
 
 @app.route('/logout')
