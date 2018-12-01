@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Remove Member Page</title>
+</head>
+<body>
+	<h1>GroupName: {{toDelete}}</h1>
+	<form action="/removeGroupMember">
+		<!-- <h3> {{toDelete}} </h3> -->
+		<div id="container">
+			{% for line in memNames %}
+			<ul> line </ul>
+			{% endfor %}
+		</div>
+	</form>
+
+</body>
+</html>

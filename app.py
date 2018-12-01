@@ -1,8 +1,11 @@
 import os
+import re
 from flask import Flask, render_template, session, redirect
 from flask import url_for, request
 from perm import conn
 
+RATE_RE = "(rate[0-9]+)"
+rate_match = re.compile(RATE_RE)
 
 app = Flask(__name__)
 app.static_folder = 'static'
@@ -40,12 +43,24 @@ def index():
         useremail = session['userEmail']
         cursor.execute(memberQuery, (useremail, useremail))
     memberData = cursor.fetchall()
+
+    cursor.rownumber = 0
+    if 'userEmail' in session:
+        query = "SELECT item_id, emoji FROM Rate WHERE email = %s"
+        cursor.execute(query, (session['userEmail']))
+    rate_data = cursor.fetchall()
+
+    cursor.rownumber = 0
+    query = "SELECT item_id, emoji, count(*) AS emoji_count FROM Rate GROUP BY item_id, emoji"
+    cursor.execute(query)
+    rate_stats = cursor.fetchall()
+
     cursor.close()
     if 'userEmail' in session:
         return render_template('index.html', ownedGroups=friendData, memberGroups=memberData, posts=data,
-                               email=session['userEmail'])
+                               rates=rate_data, rate_stats = rate_stats, email=session['userEmail'])
     else:
-        return render_template('index.html', posts=data)
+        return render_template('index.html', posts=data, rate_stats = rate_stats)
 
 
 @app.route('/login')
@@ -153,14 +168,43 @@ def logout():
 
 @app.route('/newGroup')
 def newGroup():
-    displayNewGroup = "true"
-    return render_template('newGroup.html', displayNewGroup=displayNewGroup)
-
+    if 'userEmail' in session:
+        return render_template('newGroup.html', displayNewGroup="true")
+    else:
+        return redirect('/')
 
 @app.route('/addMember/<nameGroup>')
 def addMember(nameGroup):
-    return render_template('newGroup.html', displayAddMember="true", dispGroupName=nameGroup)
+    if 'userEmail' in session:
+        return render_template('newGroup.html', displayAddMember="true", dispGroupName=nameGroup)
+    else:
+        return redirect('/')
 
+@app.route('/removeGroupMember',methods=['GET','POST'])
+def removeGroupMember():
+    # print("hello world")
+    print(toDelete)
+    useremail = session['userEmail']
+    deleteGroup = toDelete
+    if 'userEmail' in session:
+        cursor = conn.cursor()
+        showMemQuery = 'SELECT email FROM Belong WHERE fg_name = (%s) AND owner_email != (%s)'
+        cursor.execute(showMemQuery,(deleteGroup,useremail))
+        memNames = cursor.fetchone();
+        if (memNames):
+            return render_template('removeMember.html',memNames =memNames)
+        else:
+            return render_template('removeMember.html', memNames = "none")
+
+    else: 
+        return redirect('/')
+
+@app.route('/removeMember/<nameGroup>')
+def removeMember(nameGroup):
+    if 'userEmail' in session:
+        return render_template('removeMember.html',toDelete=nameGroup)
+    else:
+        return redirect('/')
 
 @app.route('/createNewGroup', methods=['GET', 'POST'])
 def createNewGroup():
@@ -176,13 +220,16 @@ def createNewGroup():
     if groupData:
         cursor.rownumber = 0
         error = "You have already created a group with this name"
+        cursor.close()
         return render_template('newGroup.html', displayNewGroup="true", error=error)
     else:
         newGroupQuery = 'INSERT INTO FriendGroup(owner_email,fg_name,description) VALUES (%s,%s,%s)'
         cursor.execute(newGroupQuery, (user_email, groupName, groupDesc))
         cursor.rownumber = 0
+        cursor.close()
         if request.form.get('AddMember') == 'AddMember':
             return render_template('newGroup.html', displayAddMember="true", dispGroupName=groupName)
+    cursor.close()
     return redirect(url_for('index'))
    
 
@@ -205,6 +252,7 @@ def addNewMember():
         if memExistData:
             cursor.rownumber = 0
             error = "This person is already in your group"
+            cursor.close()
             return render_template('newGroup.html', displayAddMember="true", dispGroupName=groupName,
                                    error=error)
         else:
@@ -213,12 +261,14 @@ def addNewMember():
             addMemberQuery = 'INSERT INTO Belong (email, owner_email, fg_name) VALUES (%s,%s,%s)'
             cursor.execute(addMemberQuery, (newMember, user_email, groupName))
             message = "You successfully added a member"
+            cursor.close()
             return render_template('newGroup.html', displayAddMember="true", dispGroupName=groupName,
                                    message=message)
     # member doesn't exist
     else:
         cursor.rownumber = 0
         error = "This person does not exist, try another email"
+        cursor.close()
         return render_template('newGroup.html', displayAddMember="true", dispGroupName=groupName,
                                error=error)
 
@@ -229,6 +279,27 @@ def addNewMember():
     #     cursor.rownumber = 0
     #     error = "This person is already in your group"
 
+@app.route('/rate', methods=['GET', 'POST'])
+def rate():
+    user_email = session['userEmail']
+    cursor = conn.cursor()
+    for item in request.form:
+        if re.match(rate_match, item):
+            cursor.rownumber = 0
+            rate_id = int(item.split('e')[-1])
+            query = "SELECT * FROM Rate WHERE item_id = (%s) AND email = (%s)"
+            cursor.execute(query, (rate_id, user_email))
+            rate_exist = cursor.fetchone()
+            cursor.rownumber = 0
+            if rate_exist:
+                query = "UPDATE Rate SET rate_time = CURRENT_TIMESTAMP, emoji = (%s) WHERE item_id = (%s) AND email = (%s)"
+                cursor.execute(query, (request.form[item], rate_id, user_email))
+            else:
+                query = "INSERT INTO Rate(email, item_id, rate_time, emoji) VALUES(%s, %s, CURRENT_TIMESTAMP, %s);"
+                cursor.execute(query, (user_email, rate_id, request.form[item]))
+            conn.commit()
+    cursor.close()
+    return redirect(url_for('index'))
 
 if __name__ == "__main__":
     app.run('127.0.0.1', 5000, debug=True)
