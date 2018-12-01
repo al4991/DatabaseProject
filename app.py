@@ -10,8 +10,9 @@ app.secret_key = "Doesn'tMatterRn"
 
 # APP_ROOT = os.path.dirname(os.path.abspath(__file__))
 
-UPLOAD_FOLDER = os.path.basename('images')
+UPLOAD_FOLDER = os.path.basename('/static')
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
 
 @app.route("/")
 def index():
@@ -124,24 +125,16 @@ def post():
     blog = request.form['content']
     pub = request.form.get('pub')
     file = request.files.getlist('image')
+    destination = 'NULL'
     if file:
-        target = app.config['UPLOAD_FOLDER']
+        target = app.config['UPLOAD_FOLDER']+'/images'
         if not os.path.isdir(target):
-            os.mkdir(target)
+            os.makedirs(target)
         for file in request.files.getlist('image'):
-            print(file)
             filename = file.filename
             destination = "/".join([target, filename])
-            print(destination)
-
-    else:
-        destination = 'NULL'
 
     pub = True if pub else False
-    # if pub:
-    #     pub = True
-    # else:
-    #     pub = False
 
     query = 'INSERT INTO ContentItem(email_post, file_path, item_name, is_pub) VALUES(%s, %s, %s, %s)'
     cursor.execute(query, (user_email, destination, blog, pub))
@@ -150,29 +143,6 @@ def post():
     conn.commit()
     cursor.close()
     return redirect(url_for('index'))
-
-#
-# @app.route('/upload', methods=['POST'])
-# def upload():
-#     target = app.config['UPLOAD_FOLDER']
-#     print(target)
-#     if not os.path.isdir(target):
-#         os.mkdir(target)
-#
-#     for file in request.files.getlist('image'):
-#         print(file)
-#         filename = file.filename
-#         destination = "/".join([target, filename])
-#         print(destination)
-#         file.save(destination)
-#     return redirect(url_for('index'))
-#
-#     # file = request.files['image']
-#     # f = os.path.join(app.config['UPLOAD_FOLDER', file.filename])
-#     # # There should be stuff to check that what we uploaded was actually an image, not malware
-#     #
-#     # file.save(f)
-    # return render_template('index.html')
 
 
 @app.route('/logout')

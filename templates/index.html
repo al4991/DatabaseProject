@@ -185,16 +185,17 @@
             <div id="rightColumn">
                 {% if email %}
 
-                 <div>
+                <div>
                     <form action="/post" method="POST" enctype="multipart/form-data">
                         <br><input type="text" name="content" placeholder="Post" required/>
                         <input type="checkbox" name="pub" ></br>
                         <input type="file" name="image" accept="image/*" multiple>
                         <br><input type="submit" value=Post /></br>
                     </form>
-                 </div>
+                </div>
 
                 {% endif %}
+
                 <table id="postTable">
                     <th>ID</th>
                     <th>Email</th>
@@ -207,10 +208,33 @@
                         <td>{{ line.item_id }}</td>
                         <td>{{ line.email_post }}</td>
                         <td>{{ line.post_time }}</td>
-                        <td>{{ line.file_path }}</td>
+                        <td>
+                        {% if line.file_path is not none %}
+                            <img style="height:300px;max-width:300px;" src="{{ line.file_path }}" alt="No pic">
+                        {% endif %}
+                        </td>
                         <td>{{ line.item_name }}</td>
                     </tr>
+<!--
+                    <div>
+
+                        <div> {{ line.email_post }} </div>
+
+                        <div> {{ line.post_time.strftime('%Y-%m-%d') }}</div>
+
+                        <div> {{ line.item_name }} </div>
+
+                        <div>
+                            {% if line.file_path is not none %}
+                                <img style="height:300px;max-width:300px;" src="{{ line.file_path }}">
+                            {% endif %}
+                        </div>
+
+                    </div>
+                    </br>-->
+
                 {% endfor %}
+
                 </table>
              </div>
         </div>
@@ -220,3 +244,7 @@
 
     </body>
 </html>
+
+
+
+
