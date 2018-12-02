@@ -192,9 +192,15 @@ def removeMember(nameGroup):
         showMemQuery = 'SELECT * FROM Belong WHERE fg_name = %s AND email != %s AND owner_email=%s'
         cursor.execute(showMemQuery, (nameGroup, useremail, useremail))
         memNames = cursor.fetchall()
-        cursor.close()
         if memNames:
-            return render_template('removeMember.html', memNames=memNames, nameGroup=nameGroup)
+            nameData = []
+            for x in range(len(memNames)):
+                searchEmail = memNames[x]['email']
+                nameQuery = 'SELECT * FROM Person WHERE email = (%s)'
+                cursor.execute(nameQuery,searchEmail)
+                nameData.extend(cursor.fetchall())
+            cursor.close()
+            return render_template('removeMember.html', memNames=memNames, nameGroup=nameGroup,nameData=nameData)
         else:
             # if there are no members the group will be deleted
             cursor = conn.cursor() 
@@ -227,7 +233,7 @@ def deleteMember():
         useremail = session['userEmail']
         deletePerson = request.form['memberEmail']
         fromGroup = request.form['deleteGroup']
-        if request.form.get('delete') == 'delete':
+        if request.form.get('Remove') == 'Remove':
             cursor = conn.cursor()
             # delete a person from your group
             deleteQuery1 = 'DELETE FROM Belong WHERE email = %s AND fg_name = %s AND owner_email = %s'
@@ -250,7 +256,7 @@ def deleteMember():
             conn.commit()
             cursor.close()
             return removeMember(fromGroup)
-        elif request.form.get('ALLDELETE') == 'ALLDELETE':
+        elif request.form.get('Delete') == 'Delete':
             cursor = conn.cursor() 
             # delete everyone from belong
             deleteQuery4 = 'DELETE FROM Belong WHERE owner_email = %s AND fg_name = %s'
@@ -309,41 +315,70 @@ def createNewGroup():
 def addNewMember():
     user_email = session['userEmail']
     groupName = request.form['groupName']
-    newMember = request.form['newMember']
+    newMemberF = request.form['newMemFname']
+    newMemberL = request.form['newMemLname']
+    duplicateTest = request.form['duplicateTest']
     # check that the member you're adding exists
     cursor = conn.cursor()
-    checkExist = 'SELECT * FROM Person WHERE email = %s'
-    cursor.execute(checkExist, newMember)
-    memExist = cursor.fetchone()
-    if memExist:
-        # if the member exists - check if they're already in your group
-        checkMemQuery = 'SELECT email FROM Belong WHERE owner_email = %s AND fg_name = %s AND email = %s'
-        cursor.execute(checkMemQuery, (user_email, groupName, newMember))
-        memExistData = cursor.fetchone()
-        # if they're already in your group send an error message
-        if memExistData:
-            cursor.rownumber = 0
-            error = "This person is already in your group"
+    checkExist = 'SELECT * FROM Person WHERE fname = (%s) AND lname = (%s)'
+    cursor.execute(checkExist, (newMemberF,newMemberL))
+    memExist = cursor.fetchall()
+    if duplicateTest == "True":
+        cursor.rownumber = 0
+        newMemEmail = request.form['newMemEmail']
+        #check if they're already in your group
+        checkInQuery = 'SELECT * FROM Belong WHERE owner_email =(%s) AND fg_name=(%s) AND email =(%s)'
+        cursor.execute(checkInQuery,(user_email,groupName,newMemEmail))
+        memExistData2 = cursor.fetchall()
+        #if the member already exists
+        if memExistData2:
             cursor.close()
-            return render_template('newGroup.html', displayAddMember="true", dispGroupName=groupName,
-                                   error=error)
+            error = "This person is already in your group"
+            return render_template('newGroup.html', displayAddMember="true", dispGroupName=groupName,error=error)
         else:
-            # member exists and is not in group so add the to your group
-            cursor.rownumber = 0
-            addMemberQuery = 'INSERT INTO Belong (email, owner_email, fg_name) VALUES (%s,%s,%s)'
-            cursor.execute(addMemberQuery, (newMember, user_email, groupName))
-            message = "You successfully added a member"
+            cursor.rownumber=0
+            addMemQuery2 = 'INSERT INTO Belong (email,owner_email,fg_name) VALUES (%s,%s,%s)'
+            cursor.execute(addMemQuery2,(newMemEmail,user_email,groupName))
+            message = "you successfully added a member"
             conn.commit()
             cursor.close()
-            return render_template('newGroup.html', displayAddMember="true", dispGroupName=groupName,
-                                   message=message)
-    # member doesn't exist
+            return render_template('newGroup.html', displayAddMember="true", dispGroupName=groupName, message=message)
     else:
-        cursor.rownumber = 0
-        error = "This person does not exist, try another email"
-        cursor.close()
-        return render_template('newGroup.html', displayAddMember="true", dispGroupName=groupName,
-                               error=error)
+        if len(memExist)==1:
+            cursor.rownumber= 0
+            # if the member exists - check if they're already in your group
+            newMember = memExist[0]['email']
+            print(newMember)
+            checkMemQuery = 'SELECT * FROM Belong WHERE owner_email = %s AND fg_name = %s AND email = %s'
+            cursor.execute(checkMemQuery, (user_email, groupName, newMember))
+            memExistData = cursor.fetchone()
+            # if they're already in your group send an error message
+            if memExistData:
+                error = "This person is already in your group"
+                cursor.close()
+                return render_template('newGroup.html', displayAddMember="true", dispGroupName=groupName,
+                                       error=error)
+            else:
+                # member exists and is not in group so add the to your group
+                cursor.rownumber = 0
+                addMemberQuery = 'INSERT INTO Belong (email, owner_email, fg_name) VALUES (%s,%s,%s)'
+                cursor.execute(addMemberQuery, (newMember, user_email, groupName))
+                message = "You successfully added a member"
+                conn.commit()
+                cursor.close()
+                return render_template('newGroup.html', displayAddMember="true", dispGroupName=groupName,
+                                       message=message)
+        
+        elif len(memExist) == 0:
+            error = "This person does not exist, try another email"
+            cursor.close()
+            duplicateS = True;
+            return render_template('newGroup.html', displayAddMember="true", dispGroupName=groupName,
+                                   error=error)
+
+        else:
+            error= "There are multiple people with the same name. Enter the correct email and to move on"
+            return render_template('newGroup.html', displayAddMember="true", dispGroupName=groupName, error=error,duplicate="true",memExist=memExist)
 
 
 @app.route('/rate', methods=['GET', 'POST'])
