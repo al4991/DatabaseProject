@@ -157,6 +157,7 @@
             margin-top:-40px;
             transition: 1s;
         }
+
         button#removeMemButton:hover {
             color:white;
             background: gray;
@@ -174,7 +175,7 @@
        .outer{
            width:500px;
            background-color:#b19cd9;
-           align:center;
+           text-align:center;
            position:center;
        }
 
@@ -185,7 +186,7 @@
            text-align:center;
            position:center;
        }
-        
+
    </style>
 
     <title> YEET and SKEET BOIS</title>
@@ -193,76 +194,65 @@
 </head>
 
     <h1>Welcome
-    {% if email %} 
-        {{ email }} 
-    {% endif %}!</h1>
-    {% if not email %}
+        {% if email %}
+            {{ email }}
+        {% endif %}!
+    </h1>
+
+    {% if email %}
+        <a href="/logout" id="logoutButton">Logout</a>
+    {% else %}
         <a href="{{ url_for('login') }}" id="loginButton">Login</a>
         <a href="{{ url_for('register') }}" id="registerButton">Register</a>
-
-        
     {% endif %}
+
     <body>
         <div id="container">
             {% if email %}
-            <div id="leftColumn">
-                <div id="myGroup">
-                    <h3>My Groups</h3>
-                    <a class="btn" href="{{ url_for('newGroup') }}"><button id="newGroupButton"> + </button></a>
-                    {% for line in ownedGroups %}
-                    <ul> {{line.fg_name}} </ul>
-                    <a id="addMemberButton" class="btn" href="{{ url_for('addMember', nameGroup=line.fg_name) }}">
-                        <button id="addMemberButton"> + </button></a>
-                    <a id ="removeMemButton" class="btn" href="{{ url_for('removeMember', nameGroup=line.fg_name) }}"> <button id="removeMemButton"> - </button></a> 
-                    {% endfor %}
-                </div>
+                <div id="leftColumn">
+                    <div id="myGroup">
+                        <h3> My Groups </h3>
+                        <a class="btn" href="{{ url_for('newGroup') }}"><button id="newGroupButton"> + </button></a>
 
-                <div id="memberGroups">
-                    <h3>Member</h3>
-                    {% for line in memberGroups %}
-                        <ul> {{line.fg_name}} </ul>
-                    {% endfor %}
-                </div>
-            </div>
+                        {% for line in ownedGroups %}
+                            <ul> {{line.fg_name}} </ul>
+                            <a id="addMemberButton" class="btn" href="{{ url_for('addMember', nameGroup=line.fg_name) }}">
+                                <button id="addMemberButton"> + </button></a>
+                            <a id ="removeMemButton" class="btn" href="{{ url_for('removeMember', nameGroup=line.fg_name) }}"> <button id="removeMemButton"> - </button></a>
+                        {% endfor %}
 
+                    </div>
+
+                    <div id="memberGroups">
+                        <h3> Member </h3>
+
+                        {% for line in memberGroups %}
+                            <ul> {{line.fg_name}} </ul>
+                        {% endfor %}
+
+                    </div>
+                </div>
             {% endif %}
 
-
-
-
-
-
-
-
-
-
-
-
             <div id="rightColumn">
+
                 {% if email %}
-
-                <div class="centered">
-                    <form action="/post" method="POST" enctype="multipart/form-data">
-                        <br><input type="text" name="content" placeholder="Post" required/>
-                        <input type="checkbox" name="pub" ></br>
-                        <input type="file" name="image" accept="image/*" multiple>
-                        <br><input type="submit" value=Post /></br>
-                    </form>
-                </div>
-
+                    <div class="outer">
+                        <form action="/post" method="POST" enctype="multipart/form-data">
+                            <input type="text" name="content" placeholder="Post" required/>
+                            <label><input type="checkbox" name="pub" > Public </label> </br>
+                            <input type="file" name="image" accept="image/*" multiple>
+                            <input type="submit" value=Post /></br>
+                        </form>
+                    </div>
                 {% endif %}
-
-
-
 
                 </br>
 
-
-
-
-
                 <form id="rate_form" action="/rate" method="POST">
+
                 {% for line in posts %}
+
                     <div class="outer">
 
                         <div class="centered"> {{ line.item_id }} </div>
@@ -280,12 +270,14 @@
                         <div class="centered"> {{ line.item_name }} </div>
 
                         <div class="centered">
+
                             {% for rating in rate_stats %}
                                 {% if rating.item_id == line.item_id %}
                                     &#{{ rating.emoji }};
                                     {{ rating.emoji_count }}
                                 {% endif %}
                             {% endfor %}
+
                         </div>
 
 
@@ -297,6 +289,7 @@
                                 <input type="radio" name="rate{{ line.item_id}}" value="x1F62E" onclick="submitForm()">&#x1F62E;
                                 <input type="radio" name="rate{{ line.item_id}}" value="x1F622" onclick="submitForm()">&#x1F622;
                                 <input type="radio" name="rate{{ line.item_id}}" value="x1F621" onclick="submitForm()">&#x1F621;
+
                                 {% for rate in rates %}
                                     {% if rate.item_id == line.item_id %}
                                         {% if rate.emoji == "x1F44C" %}
@@ -334,11 +327,14 @@
                                 </script>
 
                         </div>
-                        </br>
+
                         <!--where i would put in the share part of the post blocks-->
 
                         {% endif %}
+                        
                     </div>
+
+                    </br>
 
                 {% endfor %}
 
@@ -346,15 +342,7 @@
 
             </div>
 
-
-
-
         </div>
-
-
-        {% if email %}
-            <a href="/logout" id="logoutButton">Logout</a>
-        {% endif %}
 
     </body>
 </html>
