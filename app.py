@@ -142,23 +142,25 @@ def post():
     file = request.files.getlist('image')
     destination = 'NULL'
     if file:
+        contentType = "image"
         target = app.config['UPLOAD_FOLDER']+'/images'
         if not os.path.isdir(target):
             os.makedirs(target)
         for file in request.files.getlist('image'):
             filename = file.filename
             destination = "/".join([target, filename])
+    else:
+        contentType = "text"
 
     pub = True if pub else False
 
-    query = 'INSERT INTO ContentItem(email_post, file_path, item_name, is_pub) VALUES(%s, %s, %s, %s)'
-    cursor.execute(query, (user_email, destination, blog, pub))
+    query = 'INSERT INTO ContentItem(email_post, file_path,content_type, item_name, is_pub) VALUES(%s, %s, %s, %s)'
+    cursor.execute(query, (user_email, destination, contentType,blog, pub))
     if file:
         file.save(destination)
     conn.commit()
     cursor.close()
     return redirect(url_for('index'))
-
 
 @app.route('/logout')
 def logout():
@@ -180,31 +182,109 @@ def addMember(nameGroup):
     else:
         return redirect('/')
 
-@app.route('/removeGroupMember',methods=['GET','POST'])
-def removeGroupMember():
-    # print("hello world")
-    print(toDelete)
-    useremail = session['userEmail']
-    deleteGroup = toDelete
-    if 'userEmail' in session:
-        cursor = conn.cursor()
-        showMemQuery = 'SELECT email FROM Belong WHERE fg_name = (%s) AND owner_email != (%s)'
-        cursor.execute(showMemQuery,(deleteGroup,useremail))
-        memNames = cursor.fetchone();
-        if (memNames):
-            return render_template('removeMember.html',memNames =memNames)
-        else:
-            return render_template('removeMember.html', memNames = "none")
-
-    else: 
-        return redirect('/')
-
-@app.route('/removeMember/<nameGroup>')
+@app.route('/removeMember/<nameGroup>', methods=['GET','POST'])
 def removeMember(nameGroup):
     if 'userEmail' in session:
-        return render_template('removeMember.html',toDelete=nameGroup)
+        useremail = session['userEmail']
+        cursor = conn.cursor()
+        showMemQuery = 'SELECT * FROM Belong WHERE fg_name = (%s) AND email != (%s) AND owner_email=(%s)'
+        cursor.execute(showMemQuery, (nameGroup,useremail,useremail))
+        memNames = cursor.fetchall()
+        cursor.close()
+        if (memNames):
+            return render_template('removeMember.html',memNames=memNames,nameGroup=nameGroup)
+        else:
+            #if there are no members the group will be deleted
+            cursor = conn.cursor() 
+            # delete everyone from belong
+            deleteQuery4 = 'DELETE FROM Belong WHERE owner_email = (%s) AND fg_name = (%s)'
+            cursor.execute(deleteQuery4,(useremail,nameGroup))
+            conn.commit()
+            print('deleteQuery4complete')
+            conn.rownumber = 0
+
+            #delete the shared content
+            deleteQuery5 = 'DELETE FROM Share WHERE owner_email = (%s) AND fg_name = (%s)'
+            cursor.execute(deleteQuery5,(useremail,nameGroup))
+            conn.commit()
+            print('deleteQuery5complete')
+            conn.rownumber = 0
+
+            #delete the group
+            deleteQuery6 = 'DELETE FROM FriendGroup WHERE owner_email = (%s) AND fg_name = (%s)'
+            cursor.execute(deleteQuery6,(useremail,nameGroup))
+            conn.commit()
+            cursor.close()
+            print('deleteQuery6 complete')
+            print('deleting whole group')
+            error = "There is no one in this group. Return home to add people"
+            return redirect('/')
     else:
         return redirect('/')
+
+
+@app.route('/deleteMember',methods=['GET','POST'])
+def deleteMember():
+    if 'userEmail' in session:
+        useremail = session['userEmail']
+        deletePerson = request.form['memberEmail']
+        fromGroup = request.form['deleteGroup']
+        if request.form.get('delete') == 'delete':
+            cursor = conn.cursor()
+            #delete a person from your group
+            deleteQuery1 = 'DELETE FROM Belong WHERE email = (%s) AND fg_name = (%s) AND owner_email = (%s)'
+            cursor.execute(deleteQuery1,(deletePerson,fromGroup,useremail))
+            conn.commit()
+            cursor.close()
+            print('query was completed')
+            return removeMember(fromGroup)
+        #if you want to completely sever your relationship with the person
+        elif request.form.get('Sever') == 'Sever':
+            cursor = conn.cursor()
+            # removes the person from all their groups
+            deleteQuery2 = 'DELETE FROM Belong WHERE email = (%s) AND owner_email = (%s)'
+            cursor.execute(deleteQuery2,(deletePerson,useremail))
+            conn.commit()
+            conn.rownumber = 0
+
+            #deletes the user from all of deleted persons group to sever friendship
+            deleteQuery3 = 'DELETE FROM Belong WHERE email = (%s) AND owner_email = (%s)'
+            cursor.execute(deleteQuery3,(useremail,deletePerson))
+            conn.commit()
+            cursor.close()
+            print('in the sever query')
+            return removeMember(fromGroup)
+        elif request.form.get('ALLDELETE') == 'ALLDELETE':
+            cursor = conn.cursor() 
+            # delete everyone from belong
+            deleteQuery4 = 'DELETE FROM Belong WHERE owner_email = (%s) AND fg_name = (%s)'
+            cursor.execute(deleteQuery4,(useremail,fromGroup))
+            conn.commit()
+            print('deleteQuery4complete')
+            conn.rownumber = 0
+
+            #delete the shared content
+            deleteQuery5 = 'DELETE FROM Share WHERE owner_email = (%s) AND fg_name = (%s)'
+            cursor.execute(deleteQuery5,(useremail,fromGroup))
+            conn.commit()
+            print('deleteQuery5complete')
+            conn.rownumber = 0
+
+            #delete the group
+            deleteQuery6 = 'DELETE FROM FriendGroup WHERE owner_email = (%s) AND fg_name = (%s)'
+            cursor.execute(deleteQuery6,(useremail,fromGroup))
+            conn.commit()
+            cursor.close()
+            print('deleteQuery6 complete')
+            print('deleting whole group')
+            return redirect('/')
+            
+        else:
+            print('query not done')
+            return removeMember(fromGroup)
+    else:
+        return redirect('/')
+    
 
 @app.route('/createNewGroup', methods=['GET', 'POST'])
 def createNewGroup():
@@ -226,6 +306,7 @@ def createNewGroup():
         newGroupQuery = 'INSERT INTO FriendGroup(owner_email,fg_name,description) VALUES (%s,%s,%s)'
         cursor.execute(newGroupQuery, (user_email, groupName, groupDesc))
         cursor.rownumber = 0
+        conn.commit()
         cursor.close()
         if request.form.get('AddMember') == 'AddMember':
             return render_template('newGroup.html', displayAddMember="true", dispGroupName=groupName)
@@ -245,8 +326,8 @@ def addNewMember():
     memExist = cursor.fetchone()
     if memExist:
         # if the member exists - check if they're already in your group
-        checkMemQuery = 'SELECT email FROM Belong WHERE owner_email =(%s) AND fg_name = (%s)'
-        cursor.execute(checkMemQuery, (user_email, groupName))
+        checkMemQuery = 'SELECT email FROM Belong WHERE owner_email =(%s) AND fg_name = (%s) AND email =(%s)'
+        cursor.execute(checkMemQuery, (user_email, groupName,newMember))
         memExistData = cursor.fetchone()
         # if they're already in your group send an error message
         if memExistData:
@@ -261,6 +342,7 @@ def addNewMember():
             addMemberQuery = 'INSERT INTO Belong (email, owner_email, fg_name) VALUES (%s,%s,%s)'
             cursor.execute(addMemberQuery, (newMember, user_email, groupName))
             message = "You successfully added a member"
+            conn.commit()
             cursor.close()
             return render_template('newGroup.html', displayAddMember="true", dispGroupName=groupName,
                                    message=message)
@@ -272,13 +354,28 @@ def addNewMember():
         return render_template('newGroup.html', displayAddMember="true", dispGroupName=groupName,
                                error=error)
 
-    # checkMemQuery = 'SELECT email FROM Belong WHERE owner_email =(%s) AND fg_name = (%s)'
-    # cursor.execute(checkMemQuery, (user_email, groupName))
-    # memExistData = cursor.fetchone()
-    # if memExistData:
-    #     cursor.rownumber = 0
-    #     error = "This person is already in your group"
 
+@app.route('/rate', methods=['GET', 'POST'])
+def rate():
+    user_email = session['userEmail']
+    cursor = conn.cursor()
+    for item in request.form:
+        if re.match(rate_match, item):
+            cursor.rownumber = 0
+            rate_id = int(item.split('e')[-1])
+            query = "SELECT * FROM Rate WHERE item_id = (%s) AND email = (%s)"
+            cursor.execute(query, (rate_id, user_email))
+            rate_exist = cursor.fetchone()
+            cursor.rownumber = 0
+            if rate_exist:
+                query = "UPDATE Rate SET rate_time = CURRENT_TIMESTAMP, emoji = (%s) WHERE item_id = (%s) AND email = (%s)"
+                cursor.execute(query, (request.form[item], rate_id, user_email))
+            else:
+                query = "INSERT INTO Rate(email, item_id, rate_time, emoji) VALUES(%s, %s, CURRENT_TIMESTAMP, %s);"
+                cursor.execute(query, (user_email, rate_id, request.form[item]))
+            conn.commit()
+    cursor.close()
+    return redirect(url_for('index'))
 @app.route('/rate', methods=['GET', 'POST'])
 def rate():
     user_email = session['userEmail']

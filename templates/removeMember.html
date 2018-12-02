@@ -4,15 +4,28 @@
 	<title>Remove Member Page</title>
 </head>
 <body>
-	<h1>GroupName: {{toDelete}}</h1>
-	<form action="/removeGroupMember">
-		<!-- <h3> {{toDelete}} </h3> -->
-		<div id="container">
+	<a href="{{ url_for('index') }}" id="Home">Return Home</a>
+	<h1>GroupName: {{nameGroup}}</h1>
+		<h4> **Sever will remove this person from all of your groups, not just this one and you will also be removed from their groups </h4>
+		<form action="/deleteMember" method="POST">
+			{% if error %}
+	    		<p class="error"><strong>Error:</strong> {{ error }}</p>
+			{% endif %}
+
+			<div id="container">
+			<input type="hidden" name="deleteGroup" value="{{nameGroup}}">
 			{% for line in memNames %}
-			<ul> line </ul>
+			<ul> {{line.email}} </ul>
+			<input type="submit" name="delete" value="delete">
+			<input type="submit" name="Sever" value="Sever">
+			<input type="hidden" name="memberEmail" value="{{line.email}}">
 			{% endfor %}
+			{% if not error %}
+			<h4>Selecting delete group will delete {{nameGroup}} </h4>
+			<input type="submit" name="ALLDELETE" value="ALLDELETE">
+			{% endif %}
 		</div>
-	</form>
+		</form>
 
 </body>
 </html>
