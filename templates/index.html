@@ -1,4 +1,4 @@
-<!DOCTYPE html> 
+<!DOCTYPE html>
 <html>
 
 <head>
@@ -11,6 +11,7 @@
         padding-left: 40px;
         padding-right:40px;
         font-family: 'Oswald', sans-serif;
+        background-color: lightblue;
        }
 
        #container {
@@ -25,8 +26,10 @@
 
        #rightColumn {
         position: absolute;
+        left: 200px;
         right: 0px;
         width: 80%;
+        align: center;
         }
 
         table,th, td {
@@ -169,11 +172,28 @@
             text-align: center;
             margin-left:200px;
         }
+
+       .outer{
+           width:500px;
+           background-color:#b19cd9;
+           align:center;
+           position:center;
+       }
+
+       .centered{
+           background-color:#b19cd9;
+           width:500px;
+           color:white;
+           text-align:center;
+           position:center;
+       }
         
    </style>
 
     <title> YEEEEEEEEEE </title>
+
 </head>
+
     <h1>Welcome
     {% if email %} 
         {{ email }} 
@@ -212,7 +232,7 @@
             <div id="rightColumn">
                 {% if email %}
 
-                <div>
+                <div class="centered">
                     <form action="/post" method="POST" enctype="multipart/form-data">
                         <br><input type="text" name="content" placeholder="Post" required/>
                         <input type="checkbox" name="pub" ></br>
@@ -220,42 +240,48 @@
                         <br><input type="submit" value=Post /></br>
                     </form>
                 </div>
+                <div>
+                    <form action="share" method="POST">
+
+                    </form>
+                </div>
 
                 {% endif %}
 
-                <table id="postTable">
-                    <th>ID</th>
-                    <th>Email</th>
-                    <th>Time</th>
-                    <th>File Path</th>
-                    <th>Post</th>
-                    <th>Ratings</th>
-                {% if email %}
-                    <th>My Rating</th>
-                {% endif %}
-
+                <!--<table id="postTable">-->
+                    <!--<th>ID</th>-->
+                    <!--<th>Email</th>-->
+                    <!--<th>Time</th>-->
+                    <!--<th>File Path</th>-->
+                    <!--<th>Post</th>-->
+                    <!--<th>Ratings</th>-->
+                <!--{% if email %}-->
+                    <!--<th>My Rating</th>-->
+                <!--{% endif %}-->
+                                    <!--</table>-->
+            </br>
                 <form id="rate_form" action="/rate" method="POST">
                 {% for line in posts %}
-                    <tr>
-                        <td>{{ line.item_id }}</td>
-                        <td>{{ line.email_post }}</td>
-                        <td>{{ line.post_time }}</td>
-                        <td>
+                        <div class="outer">
+                        <div class="centered">{{ line.item_id }}</div>
+                        <div class="centered">{{ line.email_post }}</div>
+                        <div class="centered">{{ line.post_time }}</div>
+                        <div class="centered">
                         {% if line.file_path is not none %}
                             <img style="height:300px;max-width:300px;" src="{{ line.file_path }}" alt="No pic">
                         {% endif %}
-                        </td>
-                        <td>{{ line.item_name }}</td>
-                        <td>
+                        </div>
+                        <div class="centered">{{ line.item_name }}</div>
+                        <div class="centered">
                             {% for rating in rate_stats %}
                                 {% if rating.item_id == line.item_id %}
                                     &#{{ rating.emoji }};
                                     {{ rating.emoji_count }}
                                 {% endif %}
                             {% endfor %}
-                        </td>
+                        </div>
                         {% if email %}
-                            <td>
+                            <div class="centered">
                                     <input type="radio" name="rate{{ line.item_id}}" value="x1F44C" onclick="submitForm()">&#x1F44C;
                                     <input type="radio" name="rate{{ line.item_id}}" value="x1F496" onclick="submitForm()">&#x1F496;
                                     <input type="radio" name="rate{{ line.item_id}}" value="x1F606" onclick="submitForm()">&#x1F606;
@@ -296,9 +322,12 @@
                                         document.getElementById("rate_form").submit();
                                     }
                                 </script>
-                            </td>
+                            </div>
+
+                            </div>
+                                            </br>
                         {% endif %}
-                    </tr>
+
 <!--
                     <div>
 
@@ -318,7 +347,6 @@
                     </br>-->
                 {% endfor %}
                 </form>
-                </table>
              </div>
         </div>
         {% if email %}
