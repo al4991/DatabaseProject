@@ -227,6 +227,17 @@
 
             {% endif %}
 
+
+
+
+
+
+
+
+
+
+
+
             <div id="rightColumn">
                 {% if email %}
 
@@ -238,38 +249,36 @@
                         <br><input type="submit" value=Post /></br>
                     </form>
                 </div>
-                <div>
-                    <form action="share" method="POST">
-
-                    </form>
-                </div>
 
                 {% endif %}
 
-                <!--<table id="postTable">-->
-                    <!--<th>ID</th>-->
-                    <!--<th>Email</th>-->
-                    <!--<th>Time</th>-->
-                    <!--<th>File Path</th>-->
-                    <!--<th>Post</th>-->
-                    <!--<th>Ratings</th>-->
-                <!--{% if email %}-->
-                    <!--<th>My Rating</th>-->
-                <!--{% endif %}-->
-                                    <!--</table>-->
-            </br>
+
+
+
+                </br>
+
+
+
+
+
                 <form id="rate_form" action="/rate" method="POST">
                 {% for line in posts %}
-                        <div class="outer">
-                        <div class="centered">{{ line.item_id }}</div>
-                        <div class="centered">{{ line.email_post }}</div>
-                        <div class="centered">{{ line.post_time }}</div>
+                    <div class="outer">
+
+                        <div class="centered"> {{ line.item_id }} </div>
+
+                        <div class="centered"> {{ line.email_post }} </div>
+
+                        <div class="centered"> {{ line.post_time }} </div>
+
                         <div class="centered">
-                        {% if line.file_path is not none %}
-                            <img style="height:300px;max-width:300px;" src="{{ line.file_path }}" alt="No pic">
-                        {% endif %}
+                            {% if line.file_path is not none %}
+                                <img style="height:300px;max-width:300px;" src="{{ line.file_path }}" alt="No pic">
+                            {% endif %}
                         </div>
-                        <div class="centered">{{ line.item_name }}</div>
+
+                        <div class="centered"> {{ line.item_name }} </div>
+
                         <div class="centered">
                             {% for rating in rate_stats %}
                                 {% if rating.item_id == line.item_id %}
@@ -278,75 +287,71 @@
                                 {% endif %}
                             {% endfor %}
                         </div>
-                        {% if email %}
-                            <div class="centered">
-                                    <input type="radio" name="rate{{ line.item_id}}" value="x1F44C" onclick="submitForm()">&#x1F44C;
-                                    <input type="radio" name="rate{{ line.item_id}}" value="x1F496" onclick="submitForm()">&#x1F496;
-                                    <input type="radio" name="rate{{ line.item_id}}" value="x1F606" onclick="submitForm()">&#x1F606;
-                                    <input type="radio" name="rate{{ line.item_id}}" value="x1F62E" onclick="submitForm()">&#x1F62E;
-                                    <input type="radio" name="rate{{ line.item_id}}" value="x1F622" onclick="submitForm()">&#x1F622;
-                                    <input type="radio" name="rate{{ line.item_id}}" value="x1F621" onclick="submitForm()">&#x1F621;
-                                    {% for rate in rates %}
-                                        {% if rate.item_id == line.item_id %}
-                                            {% if rate.emoji == "x1F44C" %}
-                                                <script>
-                                                    document.getElementsByName("rate{{ line.item_id}}")[0].checked = true;
-                                                </script>
-                                            {% elif rate.emoji == "x1F496" %}
-                                                <script>
-                                                    document.getElementsByName("rate{{ line.item_id}}")[1].checked = true;
-                                                </script>
-                                            {% elif rate.emoji == "x1F606" %}
-                                                 <script>
-                                                    document.getElementsByName("rate{{ line.item_id}}")[2].checked = true;
-                                                </script>
-                                            {% elif rate.emoji == "x1F62E" %}
-                                                <script>
-                                                    document.getElementsByName("rate{{ line.item_id}}")[3].checked = true;
-                                                </script>
-                                            {% elif rate.emoji == "x1F622" %}
-                                                <script>
-                                                    document.getElementsByName("rate{{ line.item_id}}")[4].checked = true;
-                                                </script>
-                                            {% elif rate.emoji == "x1F621" %}
-                                                <script>
-                                                    document.getElementsByName("rate{{ line.item_id}}")[5].checked = true;
-                                                </script>
-                                            {% endif %}
+
+
+                        <div class="centered">
+                            {% if email %}
+                                <input type="radio" name="rate{{ line.item_id}}" value="x1F44C" onclick="submitForm()">&#x1F44C;
+                                <input type="radio" name="rate{{ line.item_id}}" value="x1F496" onclick="submitForm()">&#x1F496;
+                                <input type="radio" name="rate{{ line.item_id}}" value="x1F606" onclick="submitForm()">&#x1F606;
+                                <input type="radio" name="rate{{ line.item_id}}" value="x1F62E" onclick="submitForm()">&#x1F62E;
+                                <input type="radio" name="rate{{ line.item_id}}" value="x1F622" onclick="submitForm()">&#x1F622;
+                                <input type="radio" name="rate{{ line.item_id}}" value="x1F621" onclick="submitForm()">&#x1F621;
+                                {% for rate in rates %}
+                                    {% if rate.item_id == line.item_id %}
+                                        {% if rate.emoji == "x1F44C" %}
+                                            <script>
+                                                document.getElementsByName("rate{{ line.item_id}}")[0].checked = true;
+                                            </script>
+                                        {% elif rate.emoji == "x1F496" %}
+                                            <script>
+                                                document.getElementsByName("rate{{ line.item_id}}")[1].checked = true;
+                                            </script>
+                                        {% elif rate.emoji == "x1F606" %}
+                                             <script>
+                                                document.getElementsByName("rate{{ line.item_id}}")[2].checked = true;
+                                            </script>
+                                        {% elif rate.emoji == "x1F62E" %}
+                                            <script>
+                                                document.getElementsByName("rate{{ line.item_id}}")[3].checked = true;
+                                            </script>
+                                        {% elif rate.emoji == "x1F622" %}
+                                            <script>
+                                                document.getElementsByName("rate{{ line.item_id}}")[4].checked = true;
+                                            </script>
+                                        {% elif rate.emoji == "x1F621" %}
+                                            <script>
+                                                document.getElementsByName("rate{{ line.item_id}}")[5].checked = true;
+                                            </script>
                                         {% endif %}
-                                    {% endfor %}
+                                    {% endif %}
+                                {% endfor %}
+
                                 <script>
                                     function submitForm(){
                                         document.getElementById("rate_form").submit();
                                     }
                                 </script>
-                            </div>
 
-                            </div>
-                                            </br>
-                        {% endif %}
-
-<!--
-                    <div>
-
-                        <div> {{ line.email_post }} </div>
-
-                        <div> {{ line.post_time.strftime('%Y-%m-%d') }}</div>
-
-                        <div> {{ line.item_name }} </div>
-
-                        <div>
-                            {% if line.file_path is not none %}
-                                <img style="height:300px;max-width:300px;" src="{{ line.file_path }}">
-                            {% endif %}
                         </div>
+                        </br>
+                        <!--where i would put in the share part of the post blocks-->
 
+                        {% endif %}
                     </div>
-                    </br>-->
+
                 {% endfor %}
+
                 </form>
-             </div>
+
+            </div>
+
+
+
+
         </div>
+
+        
         {% if email %}
             <a href="/logout" id="logoutButton">Logout</a>
         {% endif %}
