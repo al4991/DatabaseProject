@@ -21,7 +21,7 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 
 @app.route("/")
-def index():
+def index(tagError = None):
     cursor = conn.cursor()
     if 'userEmail' in session:
         query = "SELECT * FROM ContentItem WHERE (is_pub = 1 AND post_time + INTERVAL 24 hour >= CURRENT_TIMESTAMP)" \
@@ -60,8 +60,10 @@ def index():
 
     cursor.close()
     if 'userEmail' in session:
+        if tagError:
+            flash(tagError)
         return render_template('index.html', ownedGroups=friendData, memberGroups=memberData, posts=data,
-                               rates=rate_data, rate_stats=rate_stats, email=session['userEmail'])
+                               rates=rate_data, rate_stats=rate_stats, email=session['userEmail'], tagError=tagError)
     else:
         return render_template('index.html', posts=data, rate_stats=rate_stats)
 
@@ -482,6 +484,7 @@ def tag():
                 is_public = cursor.fetchone()
                 cursor.rownumber = 0
                 if is_public['is_pub']:
+                    print("crop")
                     status = "False"
                     if user_email == taggee:
                         status = "True"
@@ -489,13 +492,16 @@ def tag():
                     cursor.execute(query, (taggee, user_email, tag_id, status))
                 else:
                     query = "SELECT * FROM Belong NATURAL JOIN Share WHERE email = %s AND item_id = %s"
-                    cursor.execute(query, (user_email, tag_id))
+                    cursor.execute(query, (taggee, tag_id))
                     is_shared = cursor.fetchone()
                     if is_shared:
+                        print("What")
                         query = "INSERT INTO Tag(email_tagged, email_tagger, item_id, status) VALUES (%s, %s, %s, %s)"
                         cursor.execute(query, (taggee, user_email, tag_id, "False"))
                     else:
-                        error = "Boohoo"
+                        error = "Tag request cannot be done."
+                        print("plop")
+                        return redirect(url_for('index', tagError=error))
             conn.commit()
             break
     cursor.close()
