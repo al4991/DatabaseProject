@@ -173,6 +173,9 @@
         }
 
        .outer{
+           border-style: solid;
+           border-width: 5px;
+           border-color: steelblue;
            width:500px;
            background-color:#b19cd9;
            text-align:center;
@@ -185,6 +188,26 @@
            color:white;
            text-align:center;
            position:center;
+       }
+
+       .title{
+           display: flex;
+           border-color: steelblue;
+           border-width: 4px;
+           border-style: solid;
+           border-top-width: 0px;
+           border-left-width: 0px;
+           border-right-width: 0px;
+       }
+       .name{
+           width: 300px;
+           background: #b19cd9;
+           font-size: x-large;
+
+       }
+       .date{
+           flex: 1;
+           background: #b19cd9;
        }
 
    </style>
@@ -221,7 +244,8 @@
                             <ul> {{line.fg_name}} </ul>
                             <a id="addMemberButton" class="btn" href="{{ url_for('addMember', nameGroup=line.fg_name) }}">
                                 <button id="addMemberButton"> + </button></a>
-                            <a id ="removeMemButton" class="btn" href="{{ url_for('removeMember', nameGroup=line.fg_name) }}"> <button id="removeMemButton"> - </button></a>
+                            <a id ="removeMemButton" class="btn" href="{{ url_for('removeMember', nameGroup=line.fg_name) }}">
+                                <button id="removeMemButton"> - </button></a>
                         {% endfor %}
 
                     </div>
@@ -256,19 +280,18 @@
 
                     <div class="outer">
 
-                        <div class="centered"> {{ line.item_id }} </div>
+                        <div class="title">
+                            <div class="name"> {{ line.email_post }} </div>
 
-                        <div class="centered"> {{ line.email_post }} </div>
-
-                        <div class="centered"> {{ line.post_time }} </div>
-
+                            <div class="date"> {{ line.post_time.strftime('%m-%d-%Y') }} </div>
+                        </div>
                         <div class="centered">
                             {% if line.file_path is not none %}
                                 <img style="height:300px;max-width:300px;" src="{{ line.file_path }}" alt="No pic">
                             {% endif %}
                         </div>
 
-                        <div class="centered"> {{ line.item_name }} </div>
+                        <div class="centered"> {{ line.item_name }} || {{line.item_id }} </div>
 
                         <div class="centered">
 
@@ -281,10 +304,10 @@
 
                         </div>
 
-
                         <div class="centered">
-                            {% if email %}
+                        {% if email %}
                             <form id="rate_form" action="/rate" method="POST">
+                            <div class="centered">
                                 <input type="radio" name="rate{{ line.item_id}}" value="x1F44C" onclick="submitForm()">&#x1F44C;
                                 <input type="radio" name="rate{{ line.item_id}}" value="x1F496" onclick="submitForm()">&#x1F496;
                                 <input type="radio" name="rate{{ line.item_id}}" value="x1F606" onclick="submitForm()">&#x1F606;
@@ -334,12 +357,17 @@
                                 <input type="submit" id="tagButton" value = Tag>
                             </form>
 
+                            <!--where i would put in the share part of the post blocks-->
+                            {% if line.is_pub == 0 %}
+                                <div class="centered">
+                                    <form action="/share" method="POST">
+                                        <a id="sharebtn" class="btn" href="{{ url_for('share', postid=line.item_id ) }}">
+                                        <input type="button" id="sharebtn"> Share </button></a>
+                                    </form>
+                                </div>
+
                             {% endif %}
-
-                        </div>
-
-                        <!--where i would put in the share part of the post blocks-->
-                        
+                        {% endif %}
                     </div>
 
                     </br>

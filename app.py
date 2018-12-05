@@ -31,6 +31,7 @@ def index():
     else:
         query = "SELECT * FROM ContentItem WHERE is_pub = 1 AND post_time + INTERVAL 24 hour >= CURRENT_TIMESTAMP"
         cursor.execute(query)
+
     data = cursor.fetchall()
     cursor.rownumber = 0
     # adding name of group that you own
@@ -91,13 +92,10 @@ def loginAuth():
         # creates a session for the user
         session['userEmail'] = user_email
         # redirecting user to our main page
-        # return redirect(url_for('/'))
         return redirect(url_for('index'))
     else: 
         # Means we didn't find the login info, so failed login
         # We create an error to pass to our html
-        # error = "Invalid email or password"
-        # return render_template('login.html', error=error)
         error = "Invalid email or password"
         return render_template('login.html', error=error)
 
@@ -148,6 +146,7 @@ def post():
         target = app.config['UPLOAD_FOLDER']+'/images'
         if not os.path.isdir(target):
             os.makedirs(target)
+
         for file in request.files.getlist('image'):
             filename = file.filename
             destination = "/".join([target, filename])
@@ -156,10 +155,12 @@ def post():
 
     pub = True if pub else False
 
-    query = 'INSERT INTO ContentItem(email_post, file_path,content_type, item_name, is_pub) VALUES(%s, %s, %s, %s)'
+    query = 'INSERT INTO ContentItem(email_post, file_path, content_type, item_name, is_pub) VALUES(%s, %s, %s, %s, %s)'
     cursor.execute(query, (user_email, destination, contentType, blog, pub))
+
     if file:
         file.save(destination)
+
     conn.commit()
     cursor.close()
     return redirect(url_for('index'))
@@ -177,6 +178,31 @@ def newGroup():
         return render_template('newGroup.html', displayNewGroup="true")
     else:
         return redirect('/')
+
+
+@app.route('/share/<postid>')
+def share(postid):
+    if 'userEmail' in session:
+        query = 'SELECT owner_email, fg_name FROM belong  WHERE email = %s AND (owner_email, fg_name) ' \
+                'NOT IN (SELECT owner_email, fg_name FROM share WHERE item_id = %s)'
+        cursor = conn.cursor()
+        cursor.execute(query, (session['userEmail'], postid))
+        data = cursor.fetchall()
+        cursor.close()
+        if data:
+            return render_template('share.html', postid=postid, data=data)
+
+    return redirect('/')
+
+
+@app.route('/shareAction/<owner_email>/<fg_name>/<postid>', methods=['GET', 'POST'])
+def shareAction(owner_email, fg_name, postid):
+    query = "INSERT INTO share VALUES (%s, %s, %s)"
+    cursor = conn.cursor()
+    cursor.execute(query, (owner_email, fg_name, postid))
+    conn.commit()
+    cursor.close()
+    return redirect('/')
 
 
 @app.route('/addMember/<nameGroup>')
@@ -200,10 +226,10 @@ def removeMember(nameGroup):
             for x in range(len(memNames)):
                 searchEmail = memNames[x]['email']
                 nameQuery = 'SELECT * FROM Person WHERE email = (%s)'
-                cursor.execute(nameQuery,searchEmail)
+                cursor.execute(nameQuery, searchEmail)
                 nameData.extend(cursor.fetchall())
             cursor.close()
-            return render_template('removeMember.html', memNames=memNames, nameGroup=nameGroup,nameData=nameData)
+            return render_template('removeMember.html', memNames=memNames, nameGroup=nameGroup, nameData=nameData)
         else:
             # if there are no members the group will be deleted
             cursor = conn.cursor() 
@@ -303,7 +329,7 @@ def createNewGroup():
         cursor.close()
         return render_template('newGroup.html', displayNewGroup="true", error=error)
     else:
-        newGroupQuery = 'INSERT INTO FriendGroup(owner_email,fg_name,description) VALUES (%s,%s,%s)'
+        newGroupQuery = 'INSERT INTO FriendGroup(owner_email, fg_name, description) VALUES (%s,%s,%s)'
         cursor.execute(newGroupQuery, (user_email, groupName, groupDesc))
         cursor.rownumber = 0
         conn.commit()
@@ -323,32 +349,32 @@ def addNewMember():
     duplicateTest = request.form['duplicateTest']
     # check that the member you're adding exists
     cursor = conn.cursor()
-    checkExist = 'SELECT * FROM Person WHERE fname = (%s) AND lname = (%s)'
-    cursor.execute(checkExist, (newMemberF,newMemberL))
+    checkExist = 'SELECT * FROM Person WHERE fname = %s AND lname = %s'
+    cursor.execute(checkExist, (newMemberF, newMemberL))
     memExist = cursor.fetchall()
     if duplicateTest == "True":
         cursor.rownumber = 0
         newMemEmail = request.form['newMemEmail']
-        #check if they're already in your group
-        checkInQuery = 'SELECT * FROM Belong WHERE owner_email =(%s) AND fg_name=(%s) AND email =(%s)'
-        cursor.execute(checkInQuery,(user_email,groupName,newMemEmail))
+        # check if they're already in your group
+        checkInQuery = 'SELECT * FROM Belong WHERE owner_email = %s AND fg_name = %s AND email = %s'
+        cursor.execute(checkInQuery, (user_email, groupName, newMemEmail))
         memExistData2 = cursor.fetchall()
-        #if the member already exists
+        # if the member already exists
         if memExistData2:
             cursor.close()
             error = "This person is already in your group"
-            return render_template('newGroup.html', displayAddMember="true", dispGroupName=groupName,error=error)
+            return render_template('newGroup.html', displayAddMember="true", dispGroupName=groupName, error=error)
         else:
-            cursor.rownumber=0
-            addMemQuery2 = 'INSERT INTO Belong (email,owner_email,fg_name) VALUES (%s,%s,%s)'
-            cursor.execute(addMemQuery2,(newMemEmail,user_email,groupName))
+            cursor.rownumber = 0
+            addMemQuery2 = 'INSERT INTO Belong (email, owner_email, fg_name) VALUES (%s, %s, %s)'
+            cursor.execute(addMemQuery2, (newMemEmail, user_email, groupName))
             message = "you successfully added a member"
             conn.commit()
             cursor.close()
             return render_template('newGroup.html', displayAddMember="true", dispGroupName=groupName, message=message)
     else:
-        if len(memExist)==1:
-            cursor.rownumber= 0
+        if len(memExist) == 1:
+            cursor.rownumber = 0
             # if the member exists - check if they're already in your group
             newMember = memExist[0]['email']
             print(newMember)
@@ -364,7 +390,7 @@ def addNewMember():
             else:
                 # member exists and is not in group so add the to your group
                 cursor.rownumber = 0
-                addMemberQuery = 'INSERT INTO Belong (email, owner_email, fg_name) VALUES (%s,%s,%s)'
+                addMemberQuery = 'INSERT INTO Belong (email, owner_email, fg_name) VALUES (%s, %s, %s)'
                 cursor.execute(addMemberQuery, (newMember, user_email, groupName))
                 message = "You successfully added a member"
                 conn.commit()
@@ -375,13 +401,13 @@ def addNewMember():
         elif len(memExist) == 0:
             error = "This person does not exist, try another email"
             cursor.close()
-            duplicateS = True;
             return render_template('newGroup.html', displayAddMember="true", dispGroupName=groupName,
                                    error=error)
 
         else:
-            error= "There are multiple people with the same name. Enter the correct email and to move on"
-            return render_template('newGroup.html', displayAddMember="true", dispGroupName=groupName, error=error,duplicate="true",memExist=memExist)
+            error = "There are multiple people with the same name. Enter the correct email and to move on"
+            return render_template('newGroup.html', displayAddMember="true", dispGroupName=groupName, error=error,
+                                   duplicate="true", memExist=memExist)
 
 
 @app.route('/rate', methods=['GET', 'POST'])
