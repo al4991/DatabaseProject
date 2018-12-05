@@ -5,7 +5,7 @@
     <title>Sharing is caring </title>
 </head>
 <body>
-
+    <h3> Groups you can share to </h3>
     {% for line in data %}
         <div>
             <form action="/shareAction" method="POST">
@@ -16,7 +16,7 @@
                     <input type="button" id="groupsel"> Select </button>
                 </a>
             </form>
-
+        </br>
         </div>
     {% endfor %}
 

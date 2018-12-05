@@ -37,7 +37,7 @@ def index():
         cursor.execute(friendQuery, session['userEmail'])
     friendData = cursor.fetchall()
     cursor.rownumber = 0
-    # adding name of group that you are apart of 
+    # adding name of group that you are a part of
     if 'userEmail' in session:
         memberQuery = "SELECT fg_name FROM Belong WHERE email = %s AND owner_email != %s"
         useremail = session['userEmail']
@@ -428,6 +428,27 @@ def rate():
             conn.commit()
     cursor.close()
     return redirect(url_for('index'))
+
+@app.route('/comments/<postid>')
+def comments(postid):
+    if 'userEmail' in session:
+        query = 'SELECT content, commentor_email FROM comments WHERE item_id = %s'
+        cursor = conn.cursor()
+        cursor.execute(query, postid)
+        data = cursor.fetchall()
+
+        cursor.rownumber = 0
+
+        query2 = 'SELECT * FROM ContentItem WHERE item_id = %s'
+        cursor.execute(query2, postid)
+        post = cursor.fetchall()
+
+        return render_template('comments.html', data=data, post=post)
+
+
+@app.route('/commentsubmit/<postid>', methods=['GET', 'POST'])
+def commentsubmit(postid):
+    return ''
 
 
 if __name__ == "__main__":

@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title> Please no toxic ^_^ </title>
+</head>
+<body>
+    <div>
+
+        <div> {{ post.email_post }} </div>
+
+        <div>
+            {% if post.file_path is not none %}
+                <img style="height:300px;max-width:300px;" src="{{ post.file_path }}" alt="No pic">
+            {% endif %}
+        </div>
+
+        <div> {{ post.item_name }} || {{ post.item_id }} </div>
+
+    </div>
+
+    {% for line in data %}
+        <div>
+            {{ line.commentor_email }}
+            {{ line.item_id }}
+        </div>
+         <div>
+            {{ line.content }}
+        </div>
+    {% endfor %}
+
+    <div>
+        <form >
+        </form>
+    </div>
+</body>

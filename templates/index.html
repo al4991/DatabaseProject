@@ -354,12 +354,20 @@
 
                                 <div class="centered">
                                     <form action="/share" method="POST">
-                                        <a id="sharebtn" class="btn" href="{{ url_for('share', postid=line.item_id ) }}">
-                                        <input type="button" id="sharebtn"> Share </button></a>
+                                    <a id="sharebtn" class="btn" href="{{ url_for('share', postid=line.item_id ) }}">
+                                    <input type="button" > Share </button></a>
                                     </form>
                                 </div>
-
+                                </br>
                             {% endif %}
+
+                            <div class="centered">
+                                <form action="/comments" method="POST">
+                                <a id="commentbtn" class="btn" href="{{ url_for('comments', postid=line.item_id ) }}">
+                                <input type="button" > Comments </button></a>
+                                </form>
+                            </div>
+                            </br>
                         {% endif %}
 
                     </div>
