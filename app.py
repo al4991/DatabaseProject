@@ -28,6 +28,7 @@ def index():
     else:
         query = "SELECT * FROM ContentItem WHERE is_pub = 1 AND post_time + INTERVAL 24 hour >= CURRENT_TIMESTAMP"
         cursor.execute(query)
+
     data = cursor.fetchall()
     cursor.rownumber = 0
     # adding name of group that you own
@@ -88,13 +89,10 @@ def loginAuth():
         # creates a session for the user
         session['userEmail'] = user_email
         # redirecting user to our main page
-        # return redirect(url_for('/'))
         return redirect(url_for('index'))
     else: 
         # Means we didn't find the login info, so failed login
         # We create an error to pass to our html
-        # error = "Invalid email or password"
-        # return render_template('login.html', error=error)
         error = "Invalid email or password"
         return render_template('login.html', error=error)
 
@@ -145,6 +143,7 @@ def post():
         target = app.config['UPLOAD_FOLDER']+'/images'
         if not os.path.isdir(target):
             os.makedirs(target)
+
         for file in request.files.getlist('image'):
             filename = file.filename
             destination = "/".join([target, filename])
@@ -153,10 +152,12 @@ def post():
 
     pub = True if pub else False
 
-    query = 'INSERT INTO ContentItem(email_post, file_path,content_type, item_name, is_pub) VALUES(%s, %s, %s, %s)'
+    query = 'INSERT INTO ContentItem(email_post, file_path, content_type, item_name, is_pub) VALUES(%s, %s, %s, %s, %s)'
     cursor.execute(query, (user_email, destination, contentType, blog, pub))
+
     if file:
         file.save(destination)
+
     conn.commit()
     cursor.close()
     return redirect(url_for('index'))
@@ -174,6 +175,32 @@ def newGroup():
         return render_template('newGroup.html', displayNewGroup="true")
     else:
         return redirect('/')
+
+
+@app.route('/share/<postid>')
+def share(postid):
+    if 'userEmail' in session:
+
+        query = 'SELECT owner_email, fg_name FROM belong  WHERE email = %s AND (owner_email, fg_name) ' \
+                'NOT IN (SELECT owner_email, fg_name FROM share WHERE item_id = %s)'
+
+        cursor = conn.cursor()
+        cursor.execute(query, (session['userEmail'], postid))
+        data = cursor.fetchall()
+        cursor.close()
+        return render_template('share.html', postid=postid, data=data)
+    else:
+        return redirect('/')
+
+
+@app.route('/shareAction/<owner_email>/<fg_name>/<postid>', methods=['GET', 'POST'])
+def shareAction(owner_email, fg_name, postid):
+    query = "INSERT INTO share VALUES (%s, %s, %s)"
+    cursor = conn.cursor()
+    cursor.execute(query, (owner_email, fg_name, postid))
+    conn.commit()
+    cursor.close()
+    return redirect('/')
 
 
 @app.route('/addMember/<nameGroup>')
