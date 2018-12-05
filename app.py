@@ -7,6 +7,9 @@ from perm import conn
 RATE_RE = "(rate[0-9]+)"
 rate_match = re.compile(RATE_RE)
 
+TAG_RE = "(tagged[0-9]+)"
+tag_match = re.compile(TAG_RE)
+
 app = Flask(__name__)
 app.static_folder = 'static'
 app.secret_key = "Doesn'tMatterRn"
@@ -400,6 +403,61 @@ def rate():
                 query = "INSERT INTO Rate (email, item_id, rate_time, emoji) VALUES (%s, %s, CURRENT_TIMESTAMP, %s)"
                 cursor.execute(query, (user_email, rate_id, request.form[item]))
             conn.commit()
+            break
+    cursor.close()
+    return redirect(url_for('index'))
+
+
+@app.route('/pendingTags')
+def pending_tag():
+    user_email = session['userEmail']
+    cursor = conn.cursor()
+    query = "SELECT * FROM Tag NATURAL JOIN ContentItem WHERE email_tagged = %s AND status = 'False'"
+    cursor.execute(query, (user_email))
+    pends = cursor.fetchall()
+    return render_template('pendingTags.html', pendings = pends)
+
+
+# @app.route('/tagAuth')
+# def tag_auth():
+
+
+
+@app.route('/tag', methods=['GET', 'POST'])
+def tag():
+    user_email = session['userEmail']
+    cursor = conn.cursor()
+    for item in request.form:
+        if re.match(tag_match, item):
+            taggee = request.form[item]
+            cursor.rownumber = 0
+            tag_id = int(item.split('d')[-1])
+            query = "SELECT * FROM Tag WHERE item_id = %s AND email_tagger = %s AND email_tagged = %s"
+            cursor.execute(query, (tag_id, user_email, taggee))
+            tag_exist = cursor.fetchone()
+            cursor.rownumber = 0
+            if not tag_exist:
+                query = "SELECT is_pub FROM ContentItem WHERE item_id = %s"
+                cursor.execute(query, (tag_id))
+                is_public = cursor.fetchone()
+                cursor.rownumber = 0
+                if is_public['is_pub']:
+                    status = "False"
+                    if user_email == taggee:
+                        status = "True"
+                    query = "INSERT INTO Tag(email_tagged, email_tagger, item_id, status) VALUES (%s, %s, %s, %s)"
+                    cursor.execute(query, (taggee, user_email, tag_id, status))
+                else:
+                    query = "SELECT * FROM Belong NATURAL JOIN Share WHERE email = %s AND item_id = %s"
+                    cursor.execute(query, (user_email, tag_id))
+                    is_shared = cursor.fetchone()
+                    if is_shared:
+                        query = "INSERT INTO Tag(email_tagged, email_tagger, item_id, status) VALUES (%s, %s, %s, %s)"
+                        cursor.execute(query, (taggee, user_email, tag_id, "False"))
+                    else:
+                        error = "Boohoo"
+            conn.commit()
+            break
     cursor.close()
     return redirect(url_for('index'))
 

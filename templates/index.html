@@ -210,6 +210,9 @@
         <div id="container">
             {% if email %}
                 <div id="leftColumn">
+                    <div id="pendingReq">
+                        <h3><a href="{{ url_for('pending_tag') }}">Pending Tags</a></h3>
+                    </div>
                     <div id="myGroup">
                         <h3> My Groups </h3>
                         <a class="btn" href="{{ url_for('newGroup') }}"><button id="newGroupButton"> + </button></a>
@@ -249,8 +252,6 @@
 
                 </br>
 
-                <form id="rate_form" action="/rate" method="POST">
-
                 {% for line in posts %}
 
                     <div class="outer">
@@ -283,6 +284,7 @@
 
                         <div class="centered">
                             {% if email %}
+                            <form id="rate_form" action="/rate" method="POST">
                                 <input type="radio" name="rate{{ line.item_id}}" value="x1F44C" onclick="submitForm()">&#x1F44C;
                                 <input type="radio" name="rate{{ line.item_id}}" value="x1F496" onclick="submitForm()">&#x1F496;
                                 <input type="radio" name="rate{{ line.item_id}}" value="x1F606" onclick="submitForm()">&#x1F606;
@@ -319,18 +321,24 @@
                                         {% endif %}
                                     {% endif %}
                                 {% endfor %}
+                            </form>
+                            <script>
+                                function submitForm(){
+                                    document.getElementById("rate_form").submit();
+                                }
+                            </script>
+                            <br/>
 
-                                <script>
-                                    function submitForm(){
-                                        document.getElementById("rate_form").submit();
-                                    }
-                                </script>
+                            <form action="/tag" method="POST">
+                                <input type="text" name="tagged{{ line.item_id }}" placeholder="email"/>
+                                <input type="submit" id="tagButton" value = Tag>
+                            </form>
+
+                            {% endif %}
 
                         </div>
 
                         <!--where i would put in the share part of the post blocks-->
-
-                        {% endif %}
                         
                     </div>
 
