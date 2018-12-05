@@ -414,6 +414,7 @@ def addNewMember():
 def rate():
     user_email = session['userEmail']
     cursor = conn.cursor()
+    print(request.form)
     for item in request.form:
         if re.match(rate_match, item):
             cursor.rownumber = 0
@@ -429,7 +430,6 @@ def rate():
                 query = "INSERT INTO Rate (email, item_id, rate_time, emoji) VALUES (%s, %s, CURRENT_TIMESTAMP, %s)"
                 cursor.execute(query, (user_email, rate_id, request.form[item]))
             conn.commit()
-            break
     cursor.close()
     return redirect(url_for('index'))
 
@@ -444,8 +444,22 @@ def pending_tag():
     return render_template('pendingTags.html', pendings = pends)
 
 
-# @app.route('/tagAuth')
-# def tag_auth():
+@app.route('/tagAuth', methods=['GET', 'POST'])
+def tag_auth():
+    user_email = session['userEmail']
+    cursor = conn.cursor()
+    for item in request.form:
+        lst = item.split('@nyu.edu')
+        tagger, item_id = lst[0], int(lst[1])
+        status = request.form[item]
+        query = ""
+        if status == "True":
+            query = "UPDATE Tag SET status = 'True' WHERE email_tagger = %s AND email_tagged = %s AND item_id = %s"
+        else:
+            query = "DELETE FROM Tag WHERE email_tagger = %s AND email_tagged = %s AND item_id = %s"
+        cursor.execute(query, (tagger+'@nyu.edu', user_email, item_id))
+        conn.commit()
+    return redirect(url_for('pending_tag'))
 
 
 
