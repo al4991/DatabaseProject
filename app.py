@@ -180,17 +180,16 @@ def newGroup():
 @app.route('/share/<postid>')
 def share(postid):
     if 'userEmail' in session:
-
         query = 'SELECT owner_email, fg_name FROM belong  WHERE email = %s AND (owner_email, fg_name) ' \
                 'NOT IN (SELECT owner_email, fg_name FROM share WHERE item_id = %s)'
-
         cursor = conn.cursor()
         cursor.execute(query, (session['userEmail'], postid))
         data = cursor.fetchall()
         cursor.close()
-        return render_template('share.html', postid=postid, data=data)
-    else:
-        return redirect('/')
+        if data:
+            return render_template('share.html', postid=postid, data=data)
+
+    return redirect('/')
 
 
 @app.route('/shareAction/<owner_email>/<fg_name>/<postid>', methods=['GET', 'POST'])
