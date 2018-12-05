@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Pending Tag Requests</title>
+</head>
+<body>
+    <a href="{{ url_for('index') }}" id="Home">Return Home</a>
+    <h1>Pending Tags</h1>
+        {% for pend in pendings %}
+            <div class="outer">
+
+                <div class="centered"> {{ pend.item_id }} </div>
+
+                <div class="centered"> {{ pend.email_post }} </div>
+
+                <div class="centered"> {{ pend.post_time }} </div>
+
+                <div class="centered">
+                    {% if pend.file_path is not none %}
+                        <img style="height:300px;max-width:300px;" src="{{ line.file_path }}" alt="No pic">
+                    {% endif %}
+                </div>
+
+                <form action="/tagAuth" method="POST">
+                    <input type="submit" name="{{ pend.email_tagger }}{{ pend.item_id }}" value="Accept">
+                    <input type="submit" name="{{ pend.email_tagged }}{{ pend.item_id }}}" value="Reject">
+                </form>
+            </div>
+        {% endfor %}
+</body>
+</html>

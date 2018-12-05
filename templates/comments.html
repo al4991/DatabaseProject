@@ -5,10 +5,11 @@
     <title> Please no toxic ^_^ </title>
 </head>
 <body>
+    <p> The Original Post</p>
     <div>
 
         <div> {{ post.email_post }} </div>
-
+        <div> {{ post.post_time.strftime('%m-%d-%Y') }} </div>
         <div>
             {% if post.file_path is not none %}
                 <img style="height:300px;max-width:300px;" src="{{ post.file_path }}" alt="No pic">
@@ -18,7 +19,8 @@
         <div> {{ post.item_name }} || {{ post.item_id }} </div>
 
     </div>
-
+    </br>
+    <p> The Comments </p>
     {% for line in data %}
         <div>
             {{ line.commentor_email }}
@@ -28,7 +30,8 @@
             {{ line.content }}
         </div>
     {% endfor %}
-
+    </br>
+    <p> Enter comment below </p>
     <div>
         <form >
         </form>

@@ -9,9 +9,8 @@
     {% for line in data %}
         <div>
             <form action="/shareAction" method="POST">
-            {{ line.fg_name }}
-            {{ line.owner_email }}
-
+                {{ line.fg_name }}
+                {{ line.owner_email }}
                 <a id="groupsel" href="{{ url_for('shareAction', owner_email=line.owner_email, fg_name=line.fg_name, postid=postid) }}">
                     <input type="button" id="groupsel"> Select </button>
                 </a>
