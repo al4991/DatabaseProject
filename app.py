@@ -83,16 +83,15 @@ def content(inSession, contentType):
     cursor = conn.cursor()
     if (inSession):
         if contentType == "text":
-            query = "SELECT * FROM ContentItem WHERE (is_pub = 1 AND contentType = (%s) AND post_time + INTERVAL 24 hour >= CURRENT_TIMESTAMP)" \
+            query = "SELECT * FROM ContentItem WHERE (is_pub = 1 AND contentType = (%s)" \
             " OR email_post = %s"
             cursor.execute(query, ("text",session['userEmail']))
         elif (contentType == "image"):
-            query = "SELECT * FROM ContentItem WHERE (is_pub = 1 AND contentType = (%s) AND post_time + INTERVAL 24 hour >= CURRENT_TIMESTAMP)" \
+            query = "SELECT * FROM ContentItem WHERE (is_pub = 1 AND contentType = (%s)" \
             " OR email_post = %s"
             cursor.execute(query, ("image",session['userEmail']))
         else:
-            query = "SELECT * FROM ContentItem WHERE (is_pub = 1 AND post_time + INTERVAL 24 hour >= CURRENT_TIMESTAMP)" \
-            " OR email_post = %s"
+            query = "SELECT * FROM ContentItem WHERE is_pub = 1 OR email_post = %s"
             cursor.execute(query, session['userEmail'])
     #user not logged in and can only see public data
     else:
