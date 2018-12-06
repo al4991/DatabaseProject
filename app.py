@@ -253,6 +253,20 @@ def shareAction(owner_email, fg_name, postid):
     return redirect('/')
 
 
+@app.route('/sharedPosts')
+def sharedPosts():
+    if 'userEmail' in session:
+        user_email = session['userEmail']
+        cursor = conn.cursor()
+        query = "SELECT * FROM Share NATURAL JOIN Belong NATURAL JOIN ContentItem WHERE email = %s"
+        cursor.execute(query, (user_email))
+        shares = cursor.fetchall()
+        cursor.close()
+        return render_template('sharedPosts.html', shares=shares)
+    else: 
+        return redirect(url_for('index'))
+
+
 @app.route('/addMember/<nameGroup>')
 def addMember(nameGroup):
     if 'userEmail' in session:
