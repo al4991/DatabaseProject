@@ -20,40 +20,41 @@ UPLOAD_FOLDER = os.path.basename('/static')
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 
-@app.route("/",methods=['GET','POST'])
-def index(tagError = None):
-    cursor = conn.cursor()
+@app.route("/", methods=['GET', 'POST'])
+def index(tagError=None):
+    sessionBool = False
+    contentType = None
+    friendData = None
+    memberData = None
+    rate_data = None
+    rate_stats = None
+
     if 'userEmail' in session:
         sessionBool = True
-    else:
-        sessionBool = False
     try: 
         contentType = request.form['contentType']
-        print(request.form['contentType'])
     except:
         contentType = "all"
     data = content(sessionBool, contentType)
-    cursor.rownumber = 0
+    cursor = conn.cursor()
     # adding name of group that you own
     if 'userEmail' in session: 
         friendQuery = "SELECT fg_name FROM FriendGroup WHERE owner_email = %s"
         cursor.execute(friendQuery, session['userEmail'])
-    friendData = cursor.fetchall()
-    cursor.rownumber = 0
+        friendData = cursor.fetchall()
+        cursor.rownumber = 0
     # adding name of group that you are a part of
-    if 'userEmail' in session:
         memberQuery = "SELECT fg_name FROM Belong WHERE email = %s AND owner_email != %s"
         useremail = session['userEmail']
         cursor.execute(memberQuery, (useremail, useremail))
-    memberData = cursor.fetchall()
+        memberData = cursor.fetchall()
+        cursor.rownumber = 0
 
-    cursor.rownumber = 0
-    if 'userEmail' in session:
         query = "SELECT item_id, emoji FROM Rate WHERE email = %s"
         cursor.execute(query, (session['userEmail']))
-    rate_data = cursor.fetchall()
+        rate_data = cursor.fetchall()
+        cursor.rownumber = 0
 
-    cursor.rownumber = 0
     query = "SELECT item_id, emoji, count(*) AS emoji_count FROM Rate GROUP BY item_id, emoji"
     cursor.execute(query)
     rate_stats = cursor.fetchall()
@@ -63,7 +64,7 @@ def index(tagError = None):
         if tagError:
             flash(tagError)
         return render_template('index.html', ownedGroups=friendData, memberGroups=memberData, posts=data,
-                               rates=rate_data, rate_stats=rate_stats, email=session['userEmail'], tagError=tagError,contentType=contentType)
+                               rates=rate_data, rate_stats=rate_stats, email=session['userEmail'], tagError=tagError, contentType=contentType)
     else:
         return render_template('index.html', posts=data, rate_stats=rate_stats,contentType=contentType)
 
@@ -95,7 +96,6 @@ def content(inSession, contentType):
             query = "SELECT * FROM ContentItem WHERE is_pub = 1 AND post_time + INTERVAL 24 hour >= CURRENT_TIMESTAMP"
             cursor.execute(query)
     data = cursor.fetchall()
-    print(data)
     cursor.close()
     return data
 
@@ -475,6 +475,7 @@ def pending_tag():
     query = "SELECT * FROM Tag NATURAL JOIN ContentItem WHERE email_tagged = %s AND status = 'False'"
     cursor.execute(query, (user_email))
     pends = cursor.fetchall()
+    cursor.close()
     return render_template('pendingTags.html', pendings = pends)
 
 
@@ -493,6 +494,7 @@ def tag_auth():
             query = "DELETE FROM Tag WHERE email_tagger = %s AND email_tagged = %s AND item_id = %s"
         cursor.execute(query, (tagger+'@nyu.edu', user_email, item_id))
         conn.commit()
+    cursor.close()
     return redirect(url_for('pending_tag'))
 
 
@@ -552,6 +554,7 @@ def comments(postid):
         query2 = 'SELECT * FROM ContentItem WHERE item_id = %s'
         cursor.execute(query2, postid)
         post = cursor.fetchone()
+        cursor.close()
 
         return render_template('comments.html', data=data, post=post)
 
