@@ -1,6 +1,6 @@
 import os
 import re
-from flask import Flask, render_template, session, redirect
+from flask import Flask, render_template, session, redirect, flash
 from flask import url_for, request
 from perm import conn
 
@@ -59,7 +59,7 @@ def index(tagError=None):
         tag_query = "SELECT item_id, fname, lname FROM Tag NATURAL JOIN Person WHERE email_tagged = email"
         cursor.execute(tag_query)
         tagged_items = cursor.fetchall()
-        cursor.rownumber = 0 
+        cursor.rownumber = 0
 
     query = "SELECT item_id, emoji, count(*) AS emoji_count FROM Rate GROUP BY item_id, emoji"
     cursor.execute(query)
@@ -73,10 +73,10 @@ def index(tagError=None):
                                memberGroups=memberData, posts=data,
                                rates=rate_data, rate_stats=rate_stats,
                                email=session['userEmail'], tagError=tagError,
-                               contentType=contentType, tags = tagged_items)
+                               contentType=contentType, tags=tagged_items)
     else:
         return render_template('index.html', posts=data,
-                               rate_stats=rate_stats,contentType=contentType)
+                               rate_stats=rate_stats, contentType=contentType)
 
 
 def content(inSession, contentType):
@@ -84,12 +84,12 @@ def content(inSession, contentType):
     if (inSession):
         if contentType == "text":
             query = "SELECT * FROM ContentItem WHERE (is_pub = 1 AND contentType = (%s)" \
-            " OR email_post = %s"
-            cursor.execute(query, ("text",session['userEmail']))
+                    " OR email_post = %s"
+            cursor.execute(query, ("text", session['userEmail']))
         elif (contentType == "image"):
             query = "SELECT * FROM ContentItem WHERE (is_pub = 1 AND contentType = (%s)" \
             " OR email_post = %s"
-            cursor.execute(query, ("image",session['userEmail']))
+            cursor.execute(query, ("image", session['userEmail']))
         else:
             query = "SELECT * FROM ContentItem WHERE is_pub = 1 OR email_post = %s"
             cursor.execute(query, session['userEmail'])
@@ -97,10 +97,10 @@ def content(inSession, contentType):
     else:
         if contentType == "text":
             query = "SELECT * FROM ContentItem WHERE is_pub = 1 AND contentType =(%s) AND post_time + INTERVAL 24 hour >= CURRENT_TIMESTAMP"
-            cursor.execute(query,"text")
+            cursor.execute(query, "text")
         elif contentType == "image":
             query = "SELECT * FROM ContentItem WHERE is_pub = 1 AND contentType =(%s) AND post_time + INTERVAL 24 hour >= CURRENT_TIMESTAMP"
-            cursor.execute(query,"text")
+            cursor.execute(query, "text")
         else:
             query = "SELECT * FROM ContentItem WHERE is_pub = 1 AND post_time + INTERVAL 24 hour >= CURRENT_TIMESTAMP"
             cursor.execute(query)
