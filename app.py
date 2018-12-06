@@ -32,14 +32,14 @@ def index(tagError=None):
 
     if 'userEmail' in session:
         sessionBool = True
-    try: 
+    try:
         contentType = request.form['contentType']
     except Exception:
         contentType = "all"
     data = content(sessionBool, contentType)
     cursor = conn.cursor()
     # adding name of group that you own
-    if 'userEmail' in session: 
+    if 'userEmail' in session:
         friendQuery = "SELECT fg_name FROM FriendGroup WHERE owner_email = %s"
         cursor.execute(friendQuery, session['userEmail'])
         friendData = cursor.fetchall()
@@ -88,12 +88,12 @@ def content(inSession, contentType):
             cursor.execute(query, ("text", session['userEmail']))
         elif (contentType == "image"):
             query = "SELECT * FROM ContentItem WHERE (is_pub = 1 AND contentType = (%s)" \
-            " OR email_post = %s"
+                    " OR email_post = %s"
             cursor.execute(query, ("image", session['userEmail']))
         else:
             query = "SELECT * FROM ContentItem WHERE is_pub = 1 OR email_post = %s"
             cursor.execute(query, session['userEmail'])
-    #user not logged in and can only see public data
+    # user not logged in and can only see public data
     else:
         if contentType == "text":
             query = "SELECT * FROM ContentItem WHERE is_pub = 1 AND contentType =(%s) AND post_time + INTERVAL 24 hour >= CURRENT_TIMESTAMP"
@@ -110,7 +110,7 @@ def content(inSession, contentType):
 
 
 @app.route('/login')
-def login(): 
+def login():
     if 'userEmail' in session:
         return redirect(url_for('index'))
     return render_template('login.html')
@@ -123,7 +123,7 @@ def loginAuth():
     # Set up cursor to prepare for executing queries
     cursor = conn.cursor()
     # Templating the query to check email and password
-    # FOR THE FUTURE: we need to account for the fact that we will 
+    # FOR THE FUTURE: we need to account for the fact that we will
     # be hashing passwords
     query = 'SELECT fname, lname FROM PERSON WHERE email = %s and password = SHA2(%s, 256)'
     cursor.execute(query, (user_email, password))
