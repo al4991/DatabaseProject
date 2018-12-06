@@ -9,7 +9,8 @@ CREATE TABLE Person(
     fname VARCHAR(20),
     lname VARCHAR(20),
     PRIMARY KEY (email)
-)ENGINE = InnoDB;
+)     ENGINE = InnoDB;
+
 
 CREATE TABLE Friendgroup(
     owner_email VARCHAR(20), 
@@ -18,7 +19,6 @@ CREATE TABLE Friendgroup(
     PRIMARY KEY (owner_email, fg_name),
     FOREIGN KEY (owner_email) REFERENCES Person(email)
 )    ENGINE = InnoDB;
-
 
 
 CREATE TABLE Belong (
@@ -44,7 +44,6 @@ CREATE TABLE ContentItem(
 )    ENGINE = InnoDB;
 
 
-
 CREATE TABLE Rate (
     email VARCHAR(20), 
     item_id int, 
@@ -54,6 +53,7 @@ CREATE TABLE Rate (
     FOREIGN KEY(email) REFERENCES Person(email),
         FOREIGN KEY(item_id)REFERENCES ContentItem(item_id)
 );        
+
 
 CREATE TABLE Share ( 
     owner_email VARCHAR(20), 
@@ -77,10 +77,12 @@ CREATE TABLE Tag (
     FOREIGN KEY(item_id) REFERENCES ContentItem(item_id)
 )    ENGINE = InnoDB;
 
+
 CREATE TABLE Comments (
 	content VARCHAR(1000),
 	commentor_email VARCHAR(20),
 	item_id int,
+	comment_time Timestamp DEFAULT CURRENT_TIMESTAMP,
 	FOREIGN KEY(commentor_email) REFERENCES Person(email),
 	FOREIGN KEY(item_id) REFERENCES ContentItem(item_id)
 ) ENGINE = InnoDB;
