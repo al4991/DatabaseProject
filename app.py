@@ -4,7 +4,7 @@ from flask import Flask, render_template, session, redirect
 from flask import url_for, request
 from perm import conn
 
-RATE_RE = "(rate[0-9]+)"
+RATE_RE = "([a-z]*Rate[0-9]+)"
 rate_match = re.compile(RATE_RE)
 
 TAG_RE = "(tagged[0-9]+)"
@@ -260,8 +260,19 @@ def sharedPosts():
         query = "SELECT * FROM Share NATURAL JOIN Belong NATURAL JOIN ContentItem WHERE email = %s"
         cursor.execute(query, (user_email))
         shares = cursor.fetchall()
+        cursor.rownumber = 0
+
+        query = "SELECT item_id, emoji, count(*) AS emoji_count FROM Rate GROUP BY item_id, emoji"
+        cursor.execute(query)
+        rate_stats = cursor.fetchall()
+        cursor.rownumber = 0
+
+        query = "SELECT item_id, emoji FROM Rate WHERE email = %s"
+        cursor.execute(query, (session['userEmail']))
+        rate_data = cursor.fetchall()
+
         cursor.close()
-        return render_template('sharedPosts.html', shares=shares)
+        return render_template('sharedPosts.html', shares=shares, rate_stats = rate_stats, rates = rate_data)
     else: 
         return redirect(url_for('index'))
 
@@ -474,10 +485,13 @@ def addNewMember():
 def rate():
     user_email = session['userEmail']
     cursor = conn.cursor()
+    page = 'index'
     for item in request.form:
         if re.match(rate_match, item):
+            if 'share' in item:
+                page = 'sharedPosts'
             cursor.rownumber = 0
-            rate_id = int(item.split('e')[-1])
+            rate_id = int(item.split('te')[-1])
             query = "SELECT * FROM Rate WHERE item_id = %s AND email = %s"
             cursor.execute(query, (rate_id, user_email))
             rate_exist = cursor.fetchone()
@@ -489,8 +503,9 @@ def rate():
                 query = "INSERT INTO Rate (email, item_id, rate_time, emoji) VALUES (%s, %s, CURRENT_TIMESTAMP, %s)"
                 cursor.execute(query, (user_email, rate_id, request.form[item]))
             conn.commit()
+            break
     cursor.close()
-    return redirect(url_for('index'))
+    return redirect(url_for(page))
 
 
 @app.route('/pendingTags', methods=['GET', 'POST'])

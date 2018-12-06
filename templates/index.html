@@ -355,38 +355,38 @@
                         {% if email %}
                             <div class="centered">
                                 <form id="rate_form{{ line.item_id }}" action="/rate" method="POST">
-                                    <input type="radio" name="rate{{ line.item_id }}" value="x1F44C" onclick="submitForm{{ line.item_id }}()">&#x1F44C;
-                                    <input type="radio" name="rate{{ line.item_id }}" value="x1F496" onclick="submitForm{{ line.item_id }}()">&#x1F496;
-                                    <input type="radio" name="rate{{ line.item_id }}" value="x1F606" onclick="submitForm{{ line.item_id }}()">&#x1F606;
-                                    <input type="radio" name="rate{{ line.item_id }}" value="x1F62E" onclick="submitForm{{ line.item_id }}()">&#x1F62E;
-                                    <input type="radio" name="rate{{ line.item_id }}" value="x1F622" onclick="submitForm{{ line.item_id }}()">&#x1F622;
-                                    <input type="radio" name="rate{{ line.item_id }}" value="x1F621" onclick="submitForm{{ line.item_id }}()">&#x1F621;
+                                    <input type="radio" name="Rate{{ line.item_id }}" value="x1F44C" onclick="submitForm{{ line.item_id }}()">&#x1F44C;
+                                    <input type="radio" name="Rate{{ line.item_id }}" value="x1F496" onclick="submitForm{{ line.item_id }}()">&#x1F496;
+                                    <input type="radio" name="Rate{{ line.item_id }}" value="x1F606" onclick="submitForm{{ line.item_id }}()">&#x1F606;
+                                    <input type="radio" name="Rate{{ line.item_id }}" value="x1F62E" onclick="submitForm{{ line.item_id }}()">&#x1F62E;
+                                    <input type="radio" name="Rate{{ line.item_id }}" value="x1F622" onclick="submitForm{{ line.item_id }}()">&#x1F622;
+                                    <input type="radio" name="Rate{{ line.item_id }}" value="x1F621" onclick="submitForm{{ line.item_id }}()">&#x1F621;
 
                                     {% for rate in rates %}
                                         {% if rate.item_id == line.item_id %}
                                             {% if rate.emoji == "x1F44C" %}
                                                 <script>
-                                                    document.getElementsByName("rate{{ line.item_id }}")[0].checked = true;
+                                                    document.getElementsByName("Rate{{ line.item_id }}")[0].checked = true;
                                                 </script>
                                             {% elif rate.emoji == "x1F496" %}
                                                 <script>
-                                                    document.getElementsByName("rate{{ line.item_id }}")[1].checked = true;
+                                                    document.getElementsByName("Rate{{ line.item_id }}")[1].checked = true;
                                                 </script>
                                             {% elif rate.emoji == "x1F606" %}
                                                  <script>
-                                                    document.getElementsByName("rate{{ line.item_id }}")[2].checked = true;
+                                                    document.getElementsByName("Rate{{ line.item_id }}")[2].checked = true;
                                                 </script>
                                             {% elif rate.emoji == "x1F62E" %}
                                                 <script>
-                                                    document.getElementsByName("rate{{ line.item_id }}")[3].checked = true;
+                                                    document.getElementsByName("Rate{{ line.item_id }}")[3].checked = true;
                                                 </script>
                                             {% elif rate.emoji == "x1F622" %}
                                                 <script>
-                                                    document.getElementsByName("rate{{ line.item_id }}")[4].checked = true;
+                                                    document.getElementsByName("Rate{{ line.item_id }}")[4].checked = true;
                                                 </script>
                                             {% elif rate.emoji == "x1F621" %}
                                                 <script>
-                                                    document.getElementsByName("rate{{ line.item_id }}")[5].checked = true;
+                                                    document.getElementsByName("Rate{{ line.item_id }}")[5].checked = true;
                                                 </script>
                                             {% endif %}
                                         {% endif %}
