@@ -148,6 +148,8 @@ def loginAuth():
 
 @app.route('/register')
 def register():
+    if 'userEmail' in session:
+        return redirect(url_for('index'))
     return render_template('signup.html')
 
 
