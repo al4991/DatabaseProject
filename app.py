@@ -516,6 +516,7 @@ def pending_tag():
     cursor.execute(query, (user_email))
     pends = cursor.fetchall()
     cursor.close()
+
     return render_template('pendingTags.html', pendings=pends)
 
 
@@ -592,13 +593,18 @@ def comments(postid):
         cursor.execute(query2, postid)
         post = cursor.fetchone()
         cursor.close()
-
-        return render_template('comments.html', data=data, post=post)
-
+        return render_template('comments.html', data=data, post=post, postid=postid)
 
 @app.route('/commentsubmit/<postid>', methods=['GET', 'POST'])
 def commentsubmit(postid):
-    return ''
+    if 'userEmail' in session:
+        content = request.form['content']
+        query = 'INSERT INTO comments VALUES (%s, %s, %s)'
+        cursor = conn.cursor()
+        cursor.execute(query, (content, session['userEmail'], postid))
+        conn.commit()
+        cursor.close()
+    return redirect(url_for('comments', postid=postid))
 
 
 if __name__ == "__main__":

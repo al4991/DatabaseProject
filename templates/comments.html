@@ -3,8 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <title> Please no toxic ^_^ </title>
+    <a href="{{ url_for('index') }}" id="Home">Return Home</a>
+
 </head>
 <body>
+
     <p> The Original Post</p>
     <div>
 
@@ -33,7 +36,12 @@
     </br>
     <p> Enter comment below </p>
     <div>
-        <form >
+        <form action="/commentsubmit/{{ postid }}" method="POST">
+            <input type="text" name="content" placeholder="Comment" required/>
+            <input type="submit" value="Comment">
         </form>
     </div>
+
+
+
 </body>
