@@ -20,19 +20,19 @@ UPLOAD_FOLDER = os.path.basename('/static')
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 
-@app.route("/")
+@app.route("/",methods=['GET','POST'])
 def index(tagError = None):
     cursor = conn.cursor()
     if 'userEmail' in session:
-        query = "SELECT * FROM ContentItem WHERE (is_pub = 1 AND post_time + INTERVAL 24 hour >= CURRENT_TIMESTAMP)" \
-            " OR email_post = %s"
-        cursor.execute(query, session['userEmail'])
-
+        sessionBool = True
     else:
-        query = "SELECT * FROM ContentItem WHERE is_pub = 1 AND post_time + INTERVAL 24 hour >= CURRENT_TIMESTAMP"
-        cursor.execute(query)
-
-    data = cursor.fetchall()
+        sessionBool = False
+    try: 
+        contentType = request.form['contentType']
+        print(request.form['contentType'])
+    except:
+        contentType = "all"
+    data = content(sessionBool, contentType)
     cursor.rownumber = 0
     # adding name of group that you own
     if 'userEmail' in session: 
@@ -63,9 +63,41 @@ def index(tagError = None):
         if tagError:
             flash(tagError)
         return render_template('index.html', ownedGroups=friendData, memberGroups=memberData, posts=data,
-                               rates=rate_data, rate_stats=rate_stats, email=session['userEmail'], tagError=tagError)
+                               rates=rate_data, rate_stats=rate_stats, email=session['userEmail'], tagError=tagError,contentType=contentType)
     else:
-        return render_template('index.html', posts=data, rate_stats=rate_stats)
+        return render_template('index.html', posts=data, rate_stats=rate_stats,contentType=contentType)
+
+
+def content(inSession, contentType):
+    cursor = conn.cursor()
+    if (inSession):
+        if contentType == "text":
+            query = "SELECT * FROM ContentItem WHERE (is_pub = 1 AND contentType = (%s) AND post_time + INTERVAL 24 hour >= CURRENT_TIMESTAMP)" \
+            " OR email_post = %s"
+            cursor.execute(query, ("text",session['userEmail']))
+        elif (contentType == "image"):
+            query = "SELECT * FROM ContentItem WHERE (is_pub = 1 AND contentType = (%s) AND post_time + INTERVAL 24 hour >= CURRENT_TIMESTAMP)" \
+            " OR email_post = %s"
+            cursor.execute(query, ("image",session['userEmail']))
+        else:
+            query = "SELECT * FROM ContentItem WHERE (is_pub = 1 AND post_time + INTERVAL 24 hour >= CURRENT_TIMESTAMP)" \
+            " OR email_post = %s"
+            cursor.execute(query, session['userEmail'])
+    #user not logged in and can only see public data
+    else:
+        if contentType == "text":
+            query = "SELECT * FROM ContentItem WHERE is_pub = 1 AND contentType =(%s) AND post_time + INTERVAL 24 hour >= CURRENT_TIMESTAMP"
+            cursor.execute(query,"text")
+        elif contentType == "image":
+            query = "SELECT * FROM ContentItem WHERE is_pub = 1 AND contentType =(%s) AND post_time + INTERVAL 24 hour >= CURRENT_TIMESTAMP"
+            cursor.execute(query,"text")
+        else:
+            query = "SELECT * FROM ContentItem WHERE is_pub = 1 AND post_time + INTERVAL 24 hour >= CURRENT_TIMESTAMP"
+            cursor.execute(query)
+    data = cursor.fetchall()
+    print(data)
+    cursor.close()
+    return data
 
 
 @app.route('/login')

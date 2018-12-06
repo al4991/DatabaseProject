@@ -269,6 +269,33 @@
             {% endif %}
 
             <div id="rightColumn">
+                
+                <form action="/" method="POST" id="filter_form">
+                <input type="radio" name="contentType" value="All" onclick="submitFilter()" {% if contentType == "All" %} checked {% endif %}> All
+                <input type="radio" name="contentType" value="Text" onclick="submitFilter()" {% if contentType == "Text" %} checked {% endif %}> Text
+                <input type="radio" name="contentType" value="Images" onclick="submitFilter()" {% if contentType == "Images" %} checked {% endif %}>Pictures
+
+                {% if contentType == "Images" %}
+                <script type="text/javascript">
+                    document.getElementsByName("contentType")[0] = false
+                    document.getElementsByName("contentType")[2] = true
+                </script>
+                {% elif contentType == "Text"%}
+                <script type="text/javascript">
+                    document.getElementsByName("contentType")[0] = false
+                    document.getElementsByName("contentType")[1] = true
+                </script>
+                {% else %}
+                <script type="text/javascript">
+                    document.getElementsByName("contentType")[0] = true
+                </script>
+                {% endif %}
+                <script type="text/javascript">
+                    function submitFilter(){
+                        document.getElementById("filter_form").submit()
+                    }
+                </script>
+                </form>
 
                 {% if email %}
                     <div class="outer">
@@ -282,6 +309,8 @@
                 {% endif %}
 
                 </br>
+
+
 
                 {% for line in posts %}
 
