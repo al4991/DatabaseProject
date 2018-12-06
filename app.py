@@ -34,7 +34,7 @@ def index(tagError=None):
         sessionBool = True
     try: 
         contentType = request.form['contentType']
-    except:
+    except Exception:
         contentType = "all"
     data = content(sessionBool, contentType)
     cursor = conn.cursor()
@@ -132,13 +132,13 @@ def loginAuth():
     # We're done with the cursor now so we can close it
     cursor.close()
 
-    # Checking to see if the login info actually exists or not 
+    # Checking to see if the login info actually exists or not
     if data:
         # creates a session for the user
         session['userEmail'] = user_email
         # redirecting user to our main page
         return redirect(url_for('index'))
-    else: 
+    else:
         # Means we didn't find the login info, so failed login
         # We create an error to pass to our html
         error = "Invalid email or password"
@@ -272,8 +272,8 @@ def sharedPosts():
         rate_data = cursor.fetchall()
 
         cursor.close()
-        return render_template('sharedPosts.html', shares=shares, rate_stats = rate_stats, rates = rate_data)
-    else: 
+        return render_template('sharedPosts.html', shares=shares, rate_stats=rate_stats, rates=rate_data)
+    else:
         return redirect(url_for('index'))
 
 
@@ -304,7 +304,7 @@ def removeMember(nameGroup):
             return render_template('removeMember.html', memNames=memNames, nameGroup=nameGroup, nameData=nameData)
         else:
             # if there are no members the group will be deleted
-            cursor = conn.cursor() 
+            cursor = conn.cursor()
             # delete everyone from belong
             deleteQuery4 = 'DELETE FROM Belong WHERE owner_email = %s AND fg_name = %s'
             cursor.execute(deleteQuery4, (useremail, nameGroup))
@@ -358,7 +358,7 @@ def deleteMember():
             cursor.close()
             return removeMember(fromGroup)
         elif request.form.get('Delete') == 'Delete':
-            cursor = conn.cursor() 
+            cursor = conn.cursor()
             # delete everyone from belong
             deleteQuery4 = 'DELETE FROM Belong WHERE owner_email = %s AND fg_name = %s'
             cursor.execute(deleteQuery4, (useremail, fromGroup))
@@ -377,12 +377,12 @@ def deleteMember():
             conn.commit()
             cursor.close()
             return redirect('/')
-            
+
         else:
             return removeMember(fromGroup)
     else:
         return redirect('/')
-    
+
 
 @app.route('/createNewGroup', methods=['GET', 'POST'])
 def createNewGroup():
@@ -410,7 +410,7 @@ def createNewGroup():
             return render_template('newGroup.html', displayAddMember="true", dispGroupName=groupName)
     cursor.close()
     return redirect(url_for('index'))
-   
+
 
 @app.route('/addNewMember', methods=['GET', 'POST'])
 def addNewMember():
@@ -468,7 +468,7 @@ def addNewMember():
                 cursor.close()
                 return render_template('newGroup.html', displayAddMember="true", dispGroupName=groupName,
                                        message=message)
-        
+
         elif len(memExist) == 0:
             error = "This person does not exist, try another email"
             cursor.close()
@@ -516,7 +516,7 @@ def pending_tag():
     cursor.execute(query, (user_email))
     pends = cursor.fetchall()
     cursor.close()
-    return render_template('pendingTags.html', pendings = pends)
+    return render_template('pendingTags.html', pendings=pends)
 
 
 @app.route('/tagAuth', methods=['GET', 'POST'])
@@ -536,7 +536,6 @@ def tag_auth():
         conn.commit()
     cursor.close()
     return redirect(url_for('pending_tag'))
-
 
 
 @app.route('/tag', methods=['GET', 'POST'])
@@ -577,6 +576,7 @@ def tag():
             break
     cursor.close()
     return redirect(url_for('index'))
+
 
 @app.route('/comments/<postid>', methods=['GET', 'POST'])
 def comments(postid):
