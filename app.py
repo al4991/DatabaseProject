@@ -34,8 +34,9 @@ def index(tagError=None):
         sessionBool = True
     try:
         contentType = request.form['contentType']
+        print(contentType)
     except Exception:
-        contentType = "all"
+        contentType = "All"
     data = content(sessionBool, contentType)
     cursor = conn.cursor()
     # adding name of group that you own
@@ -82,25 +83,23 @@ def index(tagError=None):
 def content(inSession, contentType):
     cursor = conn.cursor()
     if (inSession):
-        if contentType == "text":
-            query = "SELECT * FROM ContentItem WHERE (is_pub = 1 AND contentType = (%s)" \
-                    " OR email_post = %s"
-            cursor.execute(query, ("text", session['userEmail']))
-        elif (contentType == "image"):
-            query = "SELECT * FROM ContentItem WHERE (is_pub = 1 AND contentType = (%s)" \
-                    " OR email_post = %s"
-            cursor.execute(query, ("image", session['userEmail']))
+        if contentType == "Text":
+            query = "SELECT * FROM ContentItem WHERE (is_pub = 1 OR email_post = %s) AND content_type = 'text'"
+            cursor.execute(query, session['userEmail'])
+        elif contentType == "Images":
+            query = "SELECT * FROM ContentItem WHERE (is_pub = 1  OR email_post = %s) AND content_type = 'image'"
+            cursor.execute(query, (session['userEmail']))
         else:
             query = "SELECT * FROM ContentItem WHERE is_pub = 1 OR email_post = %s"
             cursor.execute(query, session['userEmail'])
     # user not logged in and can only see public data
     else:
-        if contentType == "text":
-            query = "SELECT * FROM ContentItem WHERE is_pub = 1 AND contentType =(%s) AND post_time + INTERVAL 24 hour >= CURRENT_TIMESTAMP"
-            cursor.execute(query, "text")
-        elif contentType == "image":
-            query = "SELECT * FROM ContentItem WHERE is_pub = 1 AND contentType =(%s) AND post_time + INTERVAL 24 hour >= CURRENT_TIMESTAMP"
-            cursor.execute(query, "text")
+        if contentType == "Text":
+            query = "SELECT * FROM ContentItem WHERE is_pub = 1 AND content_type = 'text' AND post_time + INTERVAL 24 hour >= CURRENT_TIMESTAMP"
+            cursor.execute(query)
+        elif contentType == "Images":
+            query = "SELECT * FROM ContentItem WHERE is_pub = 1 AND content_type = 'image' AND post_time + INTERVAL 24 hour >= CURRENT_TIMESTAMP"
+            cursor.execute(query)
         else:
             query = "SELECT * FROM ContentItem WHERE is_pub = 1 AND post_time + INTERVAL 24 hour >= CURRENT_TIMESTAMP"
             cursor.execute(query)
