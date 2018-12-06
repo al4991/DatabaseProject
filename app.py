@@ -443,6 +443,7 @@ def pending_tag():
     query = "SELECT * FROM Tag NATURAL JOIN ContentItem WHERE email_tagged = %s AND status = 'False'"
     cursor.execute(query, (user_email))
     pends = cursor.fetchall()
+    cursor.close()
     return render_template('pendingTags.html', pendings = pends)
 
 
@@ -461,6 +462,7 @@ def tag_auth():
             query = "DELETE FROM Tag WHERE email_tagger = %s AND email_tagged = %s AND item_id = %s"
         cursor.execute(query, (tagger+'@nyu.edu', user_email, item_id))
         conn.commit()
+        cursor.close()
     return redirect(url_for('pending_tag'))
 
 
@@ -520,13 +522,20 @@ def comments(postid):
         query2 = 'SELECT * FROM ContentItem WHERE item_id = %s'
         cursor.execute(query2, postid)
         post = cursor.fetchone()
-
-        return render_template('comments.html', data=data, post=post)
+        cursor.close()
+        return render_template('comments.html', data=data, post=post, postid=postid)
 
 
 @app.route('/commentsubmit/<postid>', methods=['GET', 'POST'])
 def commentsubmit(postid):
-    return ''
+    if 'userEmail' in session:
+        content = request.form['content']
+        query = 'INSERT INTO comments VALUES (%s, %s, %s)'
+        cursor = conn.cursor()
+        cursor.execute(query, (content, session['userEmail'], postid))
+        conn.commit()
+        cursor.close()
+    return redirect(url_for('comments', postid=postid))
 
 
 if __name__ == "__main__":
