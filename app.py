@@ -598,7 +598,7 @@ def comments(postid):
 def commentsubmit(postid):
     if 'userEmail' in session:
         content = request.form['content']
-        query = 'INSERT INTO comments VALUES (%s, %s, %s)'
+        query = 'INSERT INTO comments (content, commentor_email, item_id) VALUES (%s, %s, %s)'
         cursor = conn.cursor()
         cursor.execute(query, (content, session['userEmail'], postid))
         conn.commit()
