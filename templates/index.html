@@ -331,6 +331,14 @@
                         <div class="centered"> {{ line.item_name }} || {{line.item_id }} </div>
 
                         <div class="centered">
+                            {% for tagged in tags %}
+                                {% if tagged.item_id == line.item_id %}
+                                    @{{ tagged.fname }} {{ tagged.lname }}
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+
+                        <div class="centered">
 
                             {% for rating in rate_stats %}
                                 {% if rating.item_id == line.item_id %}

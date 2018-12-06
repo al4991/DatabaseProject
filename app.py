@@ -28,6 +28,7 @@ def index(tagError=None):
     memberData = None
     rate_data = None
     rate_stats = None
+    tagged_items = None
 
     if 'userEmail' in session:
         sessionBool = True
@@ -55,6 +56,11 @@ def index(tagError=None):
         rate_data = cursor.fetchall()
         cursor.rownumber = 0
 
+        tag_query = "SELECT item_id, fname, lname FROM Tag NATURAL JOIN Person WHERE email_tagged = email"
+        cursor.execute(tag_query)
+        tagged_items = cursor.fetchall()
+        cursor.rownumber = 0 
+
     query = "SELECT item_id, emoji, count(*) AS emoji_count FROM Rate GROUP BY item_id, emoji"
     cursor.execute(query)
     rate_stats = cursor.fetchall()
@@ -63,10 +69,14 @@ def index(tagError=None):
     if 'userEmail' in session:
         if tagError:
             flash(tagError)
-        return render_template('index.html', ownedGroups=friendData, memberGroups=memberData, posts=data,
-                               rates=rate_data, rate_stats=rate_stats, email=session['userEmail'], tagError=tagError, contentType=contentType)
+        return render_template('index.html', ownedGroups=friendData,
+                               memberGroups=memberData, posts=data,
+                               rates=rate_data, rate_stats=rate_stats,
+                               email=session['userEmail'], tagError=tagError,
+                               contentType=contentType, tags = tagged_items)
     else:
-        return render_template('index.html', posts=data, rate_stats=rate_stats,contentType=contentType)
+        return render_template('index.html', posts=data,
+                               rate_stats=rate_stats,contentType=contentType)
 
 
 def content(inSession, contentType):
@@ -411,7 +421,6 @@ def addNewMember():
             cursor.rownumber = 0
             # if the member exists - check if they're already in your group
             newMember = memExist[0]['email']
-            print(newMember)
             checkMemQuery = 'SELECT * FROM Belong WHERE owner_email = %s AND fg_name = %s AND email = %s'
             cursor.execute(checkMemQuery, (user_email, groupName, newMember))
             memExistData = cursor.fetchone()
@@ -448,7 +457,6 @@ def addNewMember():
 def rate():
     user_email = session['userEmail']
     cursor = conn.cursor()
-    print(request.form)
     for item in request.form:
         if re.match(rate_match, item):
             cursor.rownumber = 0
@@ -468,7 +476,7 @@ def rate():
     return redirect(url_for('index'))
 
 
-@app.route('/pendingTags')
+@app.route('/pendingTags', methods=['GET', 'POST'])
 def pending_tag():
     user_email = session['userEmail']
     cursor = conn.cursor()
@@ -488,7 +496,7 @@ def tag_auth():
         tagger, item_id = lst[0], int(lst[1])
         status = request.form[item]
         query = ""
-        if status == "True":
+        if status == "Accept":
             query = "UPDATE Tag SET status = 'True' WHERE email_tagger = %s AND email_tagged = %s AND item_id = %s"
         else:
             query = "DELETE FROM Tag WHERE email_tagger = %s AND email_tagged = %s AND item_id = %s"
@@ -518,7 +526,6 @@ def tag():
                 is_public = cursor.fetchone()
                 cursor.rownumber = 0
                 if is_public['is_pub']:
-                    print("crop")
                     status = "False"
                     if user_email == taggee:
                         status = "True"
@@ -529,12 +536,10 @@ def tag():
                     cursor.execute(query, (taggee, tag_id))
                     is_shared = cursor.fetchone()
                     if is_shared:
-                        print("What")
                         query = "INSERT INTO Tag(email_tagged, email_tagger, item_id, status) VALUES (%s, %s, %s, %s)"
                         cursor.execute(query, (taggee, user_email, tag_id, "False"))
                     else:
                         error = "Tag request cannot be done."
-                        print("plop")
                         return redirect(url_for('index', tagError=error))
             conn.commit()
             break
