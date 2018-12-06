@@ -112,6 +112,8 @@ def content(inSession, contentType):
 
 @app.route('/login')
 def login(): 
+    if 'userEmail' in session:
+        return redirect(url_for('index'))
     return render_template('login.html')
 
 
