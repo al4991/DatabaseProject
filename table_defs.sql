@@ -116,23 +116,16 @@ VALUES ('GG@nyu.edu', SHA2('GG', 256), 'Gina', 'Gupta');
 INSERT INTO Person(email, password, fname, lname)
 VALUES ('HH@nyu.edu', SHA2('HH', 256), 'Helen', 'Harper');
 
--- Creating friend groups 
+
+-- Inserting into AA's family group
 INSERT INTO Friendgroup(owner_email, fg_name, description)
 VALUES ('AA@nyu.edu', 'family', "Ann's family");
 
-INSERT INTO Friendgroup(owner_email, fg_name, description)
-VALUES ('BB@nyu.edu', 'family', "Bob's family");
-
-INSERT INTO Friendgroup(owner_email, fg_name, description)
-VALUES ('AA@nyu.edu', 'roommates', "Ann's Roomies");
-
--- Inserting into AA's family group
 INSERT INTO Belong(email, owner_email, fg_name)
 VALUES ('AA@nyu.edu', 'AA@nyu.edu', 'family');
 
 INSERT INTO Belong(email, owner_email, fg_name)
 VALUES ('CC@nyu.edu', 'AA@nyu.edu', 'family');
-
 
 INSERT INTO Belong(email, owner_email, fg_name)
 VALUES ('DD@nyu.edu', 'AA@nyu.edu', 'family');
@@ -140,7 +133,11 @@ VALUES ('DD@nyu.edu', 'AA@nyu.edu', 'family');
 INSERT INTO Belong(email, owner_email, fg_name)
 VALUES ('EE@nyu.edu', 'AA@nyu.edu', 'family');
 
+
 -- Inserting into BB's family group
+INSERT INTO Friendgroup(owner_email, fg_name, description)
+VALUES ('BB@nyu.edu', 'family', "Bob's family");
+
 INSERT INTO Belong(email, owner_email, fg_name)
 VALUES ('BB@nyu.edu', 'BB@nyu.edu', 'family');
 
@@ -150,7 +147,11 @@ VALUES ('FF@nyu.edu', 'BB@nyu.edu', 'family');
 INSERT INTO Belong(email, owner_email, fg_name)
 VALUES ('EE@nyu.edu', 'BB@nyu.edu', 'family');
 
+
 -- Inserting into AA's roomies group
+INSERT INTO Friendgroup(owner_email, fg_name, description)
+VALUES ('AA@nyu.edu', 'roommates', "Ann's Roomies");
+
 INSERT INTO Belong(email, owner_email, fg_name)
 VALUES ('AA@nyu.edu', 'AA@nyu.edu', 'roommates');
 
@@ -161,32 +162,118 @@ INSERT INTO Belong(email, owner_email, fg_name)
 VALUES ('HH@nyu.edu', 'AA@nyu.edu', 'roommates');
 
 
--- Ann is posting 
-INSERT INTO ContentItem(email_post, file_path, item_name,content_type, is_pub)
-VALUES('AA@nyu.edu', NULL , 'Whiskers','text', False);
+-- Inserting into HH's fiesta group
+INSERT INTO Friendgroup(owner_email, fg_name, description)
+VALUES ('HH@nyu.edu', 'Fiesta', "ITS A FIESTA BOIS");
 
-INSERT INTO Share(owner_email, fg_name, item_id) 
-VALUES( 'AA@nyu.edu', 'family',  1);
+INSERT INTO Belong(email, owner_email, fg_name)
+VALUES ('HH@nyu.edu', 'HH@nyu.edu', 'Fiesta');
+
+INSERT INTO Belong(email, owner_email, fg_name)
+VALUES ('DD@nyu.edu', 'HH@nyu.edu', 'Fiesta');
+
+INSERT INTO Belong(email, owner_email, fg_name)
+VALUES ('CC@nyu.edu', 'HH@nyu.edu', 'Fiesta');
+
+INSERT INTO Belong(email, owner_email, fg_name)
+VALUES ('GG@nyu.edu', 'HH@nyu.edu', 'Fiesta');
 
 
--- She doing it again 
+
+-- Ann is posting a lot
 INSERT INTO ContentItem(email_post, file_path, item_name, content_type, is_pub)
-VALUES('AA@nyu.edu', NULL, 'leftovers in fridge', 'text', False);
-
-INSERT INTO Share(owner_email, fg_name, item_id) 
-VALUES( 'AA@nyu.edu', 'roommates', 2);
-
-
--- Now Bobert is posting 
+VALUES('AA@nyu.edu', NULL, 'AA1', 'text', True);
 INSERT INTO ContentItem(email_post, file_path, item_name, content_type, is_pub)
-VALUES('BB@nyu.edu', NULL, 'Rover', 'text', False);
+VALUES('AA@nyu.edu', NULL, 'AA2', 'text', True);
+INSERT INTO ContentItem(email_post, file_path, item_name, content_type, is_pub)
+VALUES('AA@nyu.edu', NULL, 'AA3', 'text', True);
+INSERT INTO ContentItem(email_post, file_path, item_name, content_type, is_pub)
+VALUES('AA@nyu.edu', NULL, 'aa1', 'text', False);
+INSERT INTO ContentItem(email_post, file_path, item_name, content_type, is_pub)
+VALUES('AA@nyu.edu', NULL, 'aa2', 'text', False);
+INSERT INTO ContentItem(email_post, file_path, item_name, content_type, is_pub)
+VALUES('AA@nyu.edu', NULL, 'aa3', 'text', False);
 
-INSERT INTO Share(fg_name, owner_email, item_id) 
-VALUES('family', 'BB@nyu.edu', 3);
+-- BB is posting a lot
+INSERT INTO ContentItem(email_post, file_path, item_name, content_type, is_pub)
+VALUES('BB@nyu.edu', NULL, 'BB1', 'text', True);
+INSERT INTO ContentItem(email_post, file_path, item_name, content_type, is_pub)
+VALUES('BB@nyu.edu', NULL, 'BB2', 'text', True);
+INSERT INTO ContentItem(email_post, file_path, item_name, content_type, is_pub)
+VALUES('BB@nyu.edu', NULL, 'BB3', 'text', True);
+INSERT INTO ContentItem(email_post, file_path, item_name, content_type, is_pub)
+VALUES('BB@nyu.edu', NULL, 'bb1', 'text', False);
+INSERT INTO ContentItem(email_post, file_path, item_name, content_type, is_pub)
+VALUES('BB@nyu.edu', NULL, 'bb2', 'text', False);
+INSERT INTO ContentItem(email_post, file_path, item_name, content_type, is_pub)
+VALUES('BB@nyu.edu', NULL, 'bb3', 'text', False);
 
--- Just a public post. Nothing to see here 
-INSERT INTO ContentItem(email_post, file_path, item_name,content_type, is_pub)
-VALUES('CC@nyu.edu', NULL , 'YAH YEET','text', True);
+-- CC is posting a lot
+INSERT INTO ContentItem(email_post, file_path, item_name, content_type, is_pub)
+VALUES('CC@nyu.edu', NULL, 'CC1', 'text', True);
+INSERT INTO ContentItem(email_post, file_path, item_name, content_type, is_pub)
+VALUES('CC@nyu.edu', NULL, 'CC2', 'text', True);
+INSERT INTO ContentItem(email_post, file_path, item_name, content_type, is_pub)
+VALUES('CC@nyu.edu', NULL, 'CC3', 'text', True);
+INSERT INTO ContentItem(email_post, file_path, item_name, content_type, is_pub)
+VALUES('CC@nyu.edu', NULL, 'cc1', 'text', False);
+INSERT INTO ContentItem(email_post, file_path, item_name, content_type, is_pub)
+VALUES('CC@nyu.edu', NULL, 'cc2', 'text', False);
+INSERT INTO ContentItem(email_post, file_path, item_name, content_type, is_pub)
+VALUES('CC@nyu.edu', NULL, 'cc3', 'text', False);
 
+-- DD is posting a lot
+INSERT INTO ContentItem(email_post, file_path, item_name, content_type, is_pub)
+VALUES('DD@nyu.edu', NULL, 'DD1', 'text', True);
+INSERT INTO ContentItem(email_post, file_path, item_name, content_type, is_pub)
+VALUES('DD@nyu.edu', NULL, 'DD2', 'text', True);
+INSERT INTO ContentItem(email_post, file_path, item_name, content_type, is_pub)
+VALUES('DD@nyu.edu', NULL, 'DD3', 'text', True);
+INSERT INTO ContentItem(email_post, file_path, item_name, content_type, is_pub)
+VALUES('DD@nyu.edu', NULL, 'dd1', 'text', False);
+INSERT INTO ContentItem(email_post, file_path, item_name, content_type, is_pub)
+VALUES('DD@nyu.edu', NULL, 'dd2', 'text', False);
+INSERT INTO ContentItem(email_post, file_path, item_name, content_type, is_pub)
+VALUES('DD@nyu.edu', NULL, 'dd3', 'text', False);
 
+-- EE is posting a lot
+INSERT INTO ContentItem(email_post, file_path, item_name, content_type, is_pub)
+VALUES('EE@nyu.edu', NULL, 'EE1', 'text', True);
+INSERT INTO ContentItem(email_post, file_path, item_name, content_type, is_pub)
+VALUES('EE@nyu.edu', NULL, 'EE2', 'text', True);
+INSERT INTO ContentItem(email_post, file_path, item_name, content_type, is_pub)
+VALUES('EE@nyu.edu', NULL, 'EE3', 'text', True);
+INSERT INTO ContentItem(email_post, file_path, item_name, content_type, is_pub)
+VALUES('EE@nyu.edu', NULL, 'ee1', 'text', False);
+INSERT INTO ContentItem(email_post, file_path, item_name, content_type, is_pub)
+VALUES('EE@nyu.edu', NULL, 'ee2', 'text', False);
+INSERT INTO ContentItem(email_post, file_path, item_name, content_type, is_pub)
+VALUES('EE@nyu.edu', NULL, 'ee3', 'text', False);
 
+-- FF is posting a lot
+INSERT INTO ContentItem(email_post, file_path, item_name, content_type, is_pub)
+VALUES('FF@nyu.edu', NULL, 'FF1', 'text', True);
+INSERT INTO ContentItem(email_post, file_path, item_name, content_type, is_pub)
+VALUES('FF@nyu.edu', NULL, 'FF2', 'text', True);
+INSERT INTO ContentItem(email_post, file_path, item_name, content_type, is_pub)
+VALUES('FF@nyu.edu', NULL, 'FF3', 'text', True);
+INSERT INTO ContentItem(email_post, file_path, item_name, content_type, is_pub)
+VALUES('FF@nyu.edu', NULL, 'ff1', 'text', False);
+INSERT INTO ContentItem(email_post, file_path, item_name, content_type, is_pub)
+VALUES('FF@nyu.edu', NULL, 'ff2', 'text', False);
+INSERT INTO ContentItem(email_post, file_path, item_name, content_type, is_pub)
+VALUES('FF@nyu.edu', NULL, 'ff3', 'text', False);
+
+-- GG is posting a lot
+INSERT INTO ContentItem(email_post, file_path, item_name, content_type, is_pub)
+VALUES('GG@nyu.edu', NULL, 'GG1', 'text', True);
+INSERT INTO ContentItem(email_post, file_path, item_name, content_type, is_pub)
+VALUES('GG@nyu.edu', NULL, 'GG2', 'text', True);
+INSERT INTO ContentItem(email_post, file_path, item_name, content_type, is_pub)
+VALUES('GG@nyu.edu', NULL, 'GG3', 'text', True);
+INSERT INTO ContentItem(email_post, file_path, item_name, content_type, is_pub)
+VALUES('GG@nyu.edu', NULL, 'gg1', 'text', False);
+INSERT INTO ContentItem(email_post, file_path, item_name, content_type, is_pub)
+VALUES('GG@nyu.edu', NULL, 'gg2', 'text', False);
+INSERT INTO ContentItem(email_post, file_path, item_name, content_type, is_pub)
+VALUES('GG@nyu.edu', NULL, 'gg3', 'text', False);
