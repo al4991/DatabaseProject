@@ -84,24 +84,30 @@ def content(inSession, contentType):
     cursor = conn.cursor()
     if (inSession):
         if contentType == "Text":
-            query = "SELECT * FROM ContentItem WHERE (is_pub = 1 OR email_post = %s) AND content_type = 'text'"
+            query = "SELECT * FROM ContentItem WHERE (is_pub = 1 OR email_post = %s) AND" \
+                    " content_type = 'text' ORDER BY post_time DESC"
             cursor.execute(query, session['userEmail'])
         elif contentType == "Images":
-            query = "SELECT * FROM ContentItem WHERE (is_pub = 1  OR email_post = %s) AND content_type = 'image'"
+            query = "SELECT * FROM ContentItem WHERE (is_pub = 1  OR email_post = %s) AND" \
+                    " content_type = 'image' ORDER BY post_time DESC"
             cursor.execute(query, (session['userEmail']))
         else:
-            query = "SELECT * FROM ContentItem WHERE is_pub = 1 OR email_post = %s"
+            query = "SELECT * FROM ContentItem WHERE is_pub = 1 OR email_post = %s" \
+                    " ORDER BY post_time DESC"
             cursor.execute(query, session['userEmail'])
     # user not logged in and can only see public data
     else:
         if contentType == "Text":
-            query = "SELECT * FROM ContentItem WHERE is_pub = 1 AND content_type = 'text' AND post_time + INTERVAL 24 hour >= CURRENT_TIMESTAMP"
+            query = "SELECT * FROM ContentItem WHERE is_pub = 1 AND content_type = 'text'" \
+                    " AND post_time + INTERVAL 24 hour >= CURRENT_TIMESTAMP ORDER BY post_time DESC"
             cursor.execute(query)
         elif contentType == "Images":
-            query = "SELECT * FROM ContentItem WHERE is_pub = 1 AND content_type = 'image' AND post_time + INTERVAL 24 hour >= CURRENT_TIMESTAMP"
+            query = "SELECT * FROM ContentItem WHERE is_pub = 1 AND content_type = 'image'" \
+                    " AND post_time + INTERVAL 24 hour >= CURRENT_TIMESTAMP ORDER BY post_time DESC"
             cursor.execute(query)
         else:
-            query = "SELECT * FROM ContentItem WHERE is_pub = 1 AND post_time + INTERVAL 24 hour >= CURRENT_TIMESTAMP"
+            query = "SELECT * FROM ContentItem WHERE is_pub = 1 AND" \
+                    " post_time + INTERVAL 24 hour >= CURRENT_TIMESTAMP ORDER BY post_time DESC"
             cursor.execute(query)
     data = cursor.fetchall()
     cursor.close()
