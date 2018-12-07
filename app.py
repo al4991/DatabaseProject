@@ -300,7 +300,7 @@ def removeMember(nameGroup):
                 nameData.extend(cursor.fetchall())
             cursor.close()
             return render_template('removeMember.html', memNames=memNames,
-                                   nameGroup=nameGroup, nameData=nameData)
+                                   nameGroup=nameGroup, nameData=nameData, user=useremail)
         else:
             # if there are no members the group will be deleted
             cursor = conn.cursor()
@@ -394,6 +394,7 @@ def createNewGroup():
     checkQuery = 'SELECT fg_name FROM FriendGroup WHERE owner_email = %s AND fg_name = %s'
     cursor.execute(checkQuery, (user_email, groupName))
     groupData = cursor.fetchone()
+    # if group exits, send error
     if groupData:
         cursor.rownumber = 0
         error = "You have already created a group with this name"
@@ -402,7 +403,10 @@ def createNewGroup():
     else:
         newGroupQuery = 'INSERT INTO FriendGroup(owner_email, fg_name, description) VALUES (%s,%s,%s)'
         cursor.execute(newGroupQuery, (user_email, groupName, groupDesc))
+        conn.commit()
         cursor.rownumber = 0
+        addSelf = 'INSERT INTO Belong(email,owner_email,fg_name) VALUES (%s,%s,%s)'
+        cursor.execute(addSelf,(user_email,user_email,groupName))
         conn.commit()
         cursor.close()
         if request.form.get('AddMember') == 'AddMember':
