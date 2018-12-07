@@ -34,6 +34,10 @@
 			{% if duplicate %}
 			<input type="hidden" name="duplicateTest" value="True">
 			{% for line in memExist%}
+			<script>
+				document.getElementsByName('newMemFname')[0].value = {{ line.fname }};
+				document.getElementsByName('newMemeLname')[0].value = {{ line.fname }};
+			</script>
 			<ul>{{line.fname}} {{line.lname}} {{ line.email}}</ul>
 			{% endfor %}
 			<input type="text" name="newMemEmail" placeholder="email">
