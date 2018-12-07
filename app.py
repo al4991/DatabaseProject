@@ -51,7 +51,7 @@ def index(tagError=None):
         cursor.rownumber = 0
 
         tag_query = "SELECT item_id, fname, lname" \
-                    "FROM Tag NATURAL JOIN Person WHERE email_tagged = email"
+                    " FROM Tag NATURAL JOIN Person WHERE email_tagged = email"
         cursor.execute(tag_query)
         tagged_items = cursor.fetchall()
         cursor.rownumber = 0
