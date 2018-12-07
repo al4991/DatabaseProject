@@ -574,7 +574,7 @@ def tag():
                 return redirect(url_for('index', tagError=error))
     else:
         error = "You already tagged " + taggee + " for this post!"
-        flash(erro)
+        flash(error)
         return redirect(url_for('index', tagError=error))
     conn.commit()
     cursor.close()
