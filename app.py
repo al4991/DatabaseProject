@@ -79,14 +79,14 @@ def content(inSession, contentType):
     if inSession:
         if contentType == "Text":
             query = "SELECT * FROM ContentItem WHERE (is_pub = 1 OR email_post = %s) AND" \
-                    " content_type = 'text' ORDER BY post_time DESC"
+                    " content_type = 'text' AND post_time + INTERVAL 24 hour >= CURRENT_TIMESTAMP AND ORDER BY post_time DESC"
             cursor.execute(query, session['userEmail'])
         elif contentType == "Images":
             query = "SELECT * FROM ContentItem WHERE (is_pub = 1  OR email_post = %s) AND" \
-                    " content_type = 'image' ORDER BY post_time DESC"
+                    " content_type = 'image' AND post_time + INTERVAL 24 hour >= CURRENT_TIMESTAMP AND ORDER BY post_time DESC"
             cursor.execute(query, (session['userEmail']))
         else:
-            query = "SELECT * FROM ContentItem WHERE is_pub = 1 OR email_post = %s" \
+            query = "SELECT * FROM ContentItem WHERE (is_pub = 1 OR email_post = %s) AND post_time + INTERVAL 24 hour >= CURRENT_TIMESTAMP" \
                     " ORDER BY post_time DESC"
             cursor.execute(query, session['userEmail'])
     # user not logged in and can only see public data
@@ -186,7 +186,7 @@ def post():
     blog = request.form['content']
     pub = request.form.get('pub')
     file = request.files.getlist('image')
-    destination = 'NULL'
+    destination = None
     if file:
         contentType = "image"
         target = app.config['UPLOAD_FOLDER']+'/images'
@@ -206,7 +206,6 @@ def post():
 
     if file:
         file.save(destination)
-
     conn.commit()
     cursor.close()
     return redirect(url_for('index'))
