@@ -1,0 +1,65 @@
+html,body {
+	font-family: 'Oswald', sans-serif;
+}
+html, body {
+	text-align: center;
+	background: #c5d9f9;
+}
+a#Home {
+	position: absolute;
+	left:0;
+	margin-left:10px;
+	text-decoration: none;
+	background: #b19cd9;
+	color:white;
+	border: 5px solid #b19cd9;
+}
+
+a#Home:hover {
+	color: #b19cd9;
+	background: white;
+	border: 5px solid white;
+}
+
+#addMemButton {
+	border: none;
+		color: white;
+		background:#b19cd9;
+		border: 5px solid #b19cd9;
+		margin: 4px;
+}
+#holder, #holder02 {
+	/*width:200px;*/
+	margin-top:50px;
+	display: inline-block;
+	padding:10px;
+	padding-bottom: 15px;
+	border: 10px solid #b19cd9;
+}
+
+a#Home02 {
+	position:relative;
+	text-decoration: none;
+	background: #b19cd9;
+	color:white;
+	top:10px;
+	border: 3px solid #b19cd9;
+	border-top:1px solid #b19cd9;
+	padding:3px;
+}
+
+input#nameInput {
+	position: relative;
+	top:-20px;
+}
+
+input#addMemButton02 {
+	position:relative;
+	top:10px;
+	border:none;
+	background: #b19cd9;
+	color:white;
+	border: 5px solid #b19cd9;
+	border-top: -2px solid #b19cd9;
+	padding:3px;
+}

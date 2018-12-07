@@ -1,30 +1,6 @@
 <link href="https://fonts.googleapis.com/css?family=Oswald" rel="stylesheet">
-<style type="text/css">
-	#body {
-		font-family: 'Oswald', sans-serif;
-		text-align: center;
-	}
-    button {
-    	border: none;
-    	color:white;
-    	background: #b2d0ff;
-    	border:10px solid #b2d0ff;
-   	}
+<link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='./css/signup.css') }}">
 
-   	button:hover {
-   		background: #85b1f7;
-   		border:10px solid #85b1f7;
-   	}
-
-   	#signUpButton{
-   		border: none;
-   		color: white;
-   		background:#b2d0ff;
-   		border: 5px solid #b2d0ff;
-   		margin: 4px;
-   	}
-
-</style>
 <div id="body">
 	<h1>Welcome to PriCoSha</h1>
 <form action="/registerAuth" method="POST">

@@ -1,0 +1,23 @@
+#body {
+	font-family: 'Oswald', sans-serif;
+	text-align: center;
+}
+button {
+	border: none;
+	color:white;
+	background: #b2d0ff;
+	border:10px solid #b2d0ff;
+}
+
+button:hover {
+	background: #85b1f7;
+	border:10px solid #85b1f7;
+}
+
+#signUpButton{
+	border: none;
+	color: white;
+	background:#b2d0ff;
+	border: 5px solid #b2d0ff;
+	margin: 4px;
+}
