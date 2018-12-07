@@ -21,11 +21,12 @@ def index(tagError=None):
     rate_data = None
     tagged_items = None
 
+
+
     if 'userEmail' in session:
         sessionBool = True
     try:
         contentType = request.form['contentType']
-        print(contentType)
 
     except Exception:
         contentType = "All"
@@ -63,8 +64,6 @@ def index(tagError=None):
 
     cursor.close()
     if 'userEmail' in session:
-        if tagError:
-            flash(tagError)
         return render_template('index.html', ownedGroups=friendData,
                                memberGroups=memberData, posts=data,
                                rates=rate_data, rate_stats=rate_stats,
@@ -571,9 +570,11 @@ def tag():
                 cursor.execute(query, (taggee, user_email, tag_id, "False"))
             else:
                 error = "Tag request cannot be done."
+                flash(error)
                 return redirect(url_for('index', tagError=error))
     else:
         error = "You already tagged " + taggee + " for this post!"
+        flash(erro)
         return redirect(url_for('index', tagError=error))
     conn.commit()
     cursor.close()

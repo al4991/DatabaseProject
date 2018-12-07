@@ -2,11 +2,81 @@
 <html>
 <head>
 	<title>Remove Member Page</title>
+
+	<style type="text/css">
+		body {
+			background:#c5d9f9;
+		}
+		a#Home {
+			position: absolute;
+			left:0;
+			margin-left:10px;
+			text-decoration: none;
+			background: #b19cd9;
+			color:white;
+			border: 5px solid #b19cd9;
+		}
+
+		a#Home:hover {
+			color: #b19cd9;
+			background: white;
+			border: 5px solid white;
+		}
+
+		h1,
+		h4,
+		div#container,
+		input#deletebtn {
+			position: relative;
+			top:30px;
+
+		}
+
+		input {
+			background:steelblue;
+			border: 5px solid steelblue;
+			color:white;
+			position:relative;
+		}
+		input#deletebtn {
+			border: 10px solid steelblue;
+			border-radius: 10px;
+			left:430px;
+			transition:0.5s;
+		}
+		input#deletebtn:hover {
+			border: 10px solid white;
+			background:white;
+			color:steelblue;
+		}
+
+		input#removebtn,
+		input#severbtn {
+			position:relative;
+			left:250px;
+			bottom:35px;
+			margin-right:20px;
+			border-radius:10px;
+			transition:0.5s;
+		}
+
+		input#removebtn:hover,
+		input#severbtn:hover {
+			background:white;
+			border: 5px solid white;
+			color:steelblue;
+			border-radius:10px;
+		}
+
+		h1, h4 {
+			text-align: center;
+		}
+	</style>
 </head>
 <body>
 	<a href="{{ url_for('index') }}" id="Home">Return Home</a>
-	<h1>GroupName: {{nameGroup}}</h1>
-		<h4> **Sever will remove this person from all of your groups, not just this one and you will also be removed from their groups </h4>
+	<h1>{{nameGroup}}</h1>
+		<h4> **Sever will remove this person from all of your groups (not just this one) and you will be removed from their groups </h4>
 		<form action="/deleteMember" method="POST">
 			{% if error %}
 	    		<p class="error"><strong>Error:</strong> {{ error }}</p>
@@ -17,13 +87,13 @@
 			{% for line in nameData %}
 
 			<ul> {{line.fname}} {{line.lname}} {{line.email}} </ul>
-			<input type="submit" name="Remove" value="Remove">
-			<input type="submit" name="Sever" value="Sever">
+			<input id="removebtn" type="submit" name="Remove" value="Remove">
+			<input id="severbtn" type="submit" name="Sever" value="Sever">
 			<input type="hidden" name="memberEmail" value="{{line.email}}">
 			{% endfor %}
 			{% if not error %}
+			<input id="deletebtn" type="submit" name="Delete" value="Delete">
 			<h4>Selecting delete group will delete {{nameGroup}} </h4>
-			<input type="submit" name="Delete" value="Delete">
 			{% endif %}
 		</div>
 		</form>
