@@ -17,7 +17,7 @@
             <div> {{ post.post_time.strftime('%m-%d-%Y') }} </div>
             <div>
                 {% if post.file_path is not none %}
-                    <img style="height:300px;max-width:300px;" src="{{ post.file_path }}" alt="No pic">
+                    <img style="height:300px;max-width:300px;" src="../{{ post.file_path }}" alt="No pic">
                 {% endif %}
             </div>
 
