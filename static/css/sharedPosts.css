@@ -15,6 +15,7 @@ a#homeButton {
     background: #b19cd9;
     color:white;
     border: 10px solid #b19cd9;
+    border-radius:5px;
     transition: 0.5s;
 }
 
@@ -114,6 +115,7 @@ a#logoutButton {
     background: #b19cd9;
     color:white;
     border: 10px solid #b19cd9;
+    border-radius:5px;
     transition:0.5s;
 }
 a#logoutButton:hover {

@@ -1,23 +1,36 @@
-#body {
-  text-align:center;
+html,
+body {
   font-family: 'Oswald', sans-serif;
+  text-align: center;
+  background:#b19cd9;
 }
 #loginButton{
   border: none;
-  color: white;
-  background:#b2d0ff;
-  border: 5px solid #b2d0ff;
+  background: #85b1f7;
+  color:white;
+  border: 5px solid #85b1f7;
+  border-radius:5px;
+  transition:0.5s;
   margin: 4px;
 }
+#loginButton:hover {
+  color:#85b1f7;
+  border:5px solid white;
+  background: white;
+}
+
 
 button {
   border: none;
+  background: #85b1f7;
   color:white;
-  background: #b2d0ff;
-  border:10px solid #b2d0ff;
+  border: 5px solid #85b1f7;
+  border-radius:5px;
+  transition:0.5s;
 }
 
 button:hover {
-  background: #85b1f7;
-  border:10px solid #85b1f7;
+  color:#85b1f7;
+  border:5px solid white;
+  background: white;
 }

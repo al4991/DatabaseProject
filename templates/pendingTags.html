@@ -2,14 +2,17 @@
 <html>
 <head>
     <title>Pending Tag Requests</title>
+    <link href="https://fonts.googleapis.com/css?family=Oswald" rel="stylesheet">
+    <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='./css/tags.css') }}">
 </head>
 <body>
-    <a href="{{ url_for('index') }}" id="Home">Return Home</a>
+    <div id="container">
+    <a href="/" id="homeButton">Home</a>
     <h1>Pending Tags</h1>
         {% for pend in pendings %}
             <div class="outer">
 
-                <div class="centered"> {{ pend.item_id }} </div>
+                <div class="centered"> Post ID: {{ pend.item_id }} </div>
 
                 <div class="centered"> {{ pend.email_post }} </div>
 
@@ -27,5 +30,6 @@
                 </form>
             </div>
         {% endfor %}
+        <div>
 </body>
 </html>
