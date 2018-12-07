@@ -277,3 +277,10 @@ INSERT INTO ContentItem(email_post, file_path, item_name, content_type, is_pub)
 VALUES('GG@nyu.edu', NULL, 'gg2', 'text', False);
 INSERT INTO ContentItem(email_post, file_path, item_name, content_type, is_pub)
 VALUES('GG@nyu.edu', NULL, 'gg3', 'text', False);
+
+-- Testing Tag case :)
+INSERT INTO tag (email_tagged, email_tagger, item_id, status)
+VALUES ('CC@nyu.edu', 'FF@nyu.edu', 31, True);
+
+INSERT INTO tag (email_tagged, email_tagger, item_id, status)
+VALUES('AA@nyu.edu', 'CC@nyu.edu', 31, True);
