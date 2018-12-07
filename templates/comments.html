@@ -8,7 +8,8 @@
 </head>
 <body>
     <a href="{{ url_for('index') }}" id="Home">Home</a>
-    <div id="container">
+
+    <div class="container">
         <div id="post">
 
             <div> {{ post.email_post }} </div>
@@ -42,7 +43,7 @@
                 <input type="text" name="content" placeholder="Comment" required/>
                 <input type="submit" value="Comment">
             </form>
-    </div>
+        </div>
     </div>
 </body>
 </html>
