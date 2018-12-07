@@ -90,6 +90,13 @@
                             </script>
 
                         </div>
+                        <br>
+                        <div class="centered">
+                            <form action="/comments" method="POST">
+                                <a id="comments" class="btn" href="{{ url_for('comments', postid=line.item_id ) }}">
+                                <input type="button" id="comments"> Comments </a>
+                            </form>
+                        </div>
                     </div>
                     </br>
                 {% endfor %}
