@@ -2,36 +2,14 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='./css/comments.css') }}">
     <title> Please no toxic ^_^ </title>
     <style type="text/css">
-        a#Home {
-            position: absolute;
-            left:0;
-            margin-left:10px;
-            text-decoration: none;
-            background: #b19cd9;
-            color:white;
-            border: 5px solid #b19cd9;
-        }
-
-        a#Home:hover {
-            color: #b19cd9;
-            background: white;
-            border: 5px solid white;
-        }
-        div#container{
-            position: relative;
-            top:30px;
-            text-align: center;
-        }
-        div#post {
-            font-size:20px;
-        }
-
+        
     </style>
 </head>
 <body>
-    <a href="{{ url_for('index') }}" id="Home">Return Home</a>
+    <a href="{{ url_for('index') }}" id="Home">Home</a>
     <div id="container">
         <div id="post">
 
@@ -39,14 +17,15 @@
             <div> {{ post.post_time.strftime('%m-%d-%Y') }} </div>
             <div>
                 {% if post.file_path is not none %}
-                    <img style="height:300px;max-width:300px;" src="../{{ post.file_path }}" alt="No pic">
+                    <img style="height:300px;max-width:300px;" src="{{ post.file_path }}" alt="No pic">
                 {% endif %}
             </div>
+
             <div> {{ post.item_name }} || {{ post.item_id }} </div>
 
         </div>
         </br>
-        
+        <div id="allComments">
         {% for line in data %}
         <div id="newComment">
             <div id="commentEmail">
@@ -58,13 +37,14 @@
             </div>
         </div>
         {% endfor %}
+        
         </br>
-        <p> Enter comment below </p>
-        <div>
+        <div id="commentBox">
             <form action="/commentsubmit/{{ postid }}" method="POST">
                 <input type="text" name="content" placeholder="Comment" required/>
                 <input type="submit" value="Comment">
             </form>
+    </div>
     </div>
 </body>
 </html>
