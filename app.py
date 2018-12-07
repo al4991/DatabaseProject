@@ -4,12 +4,6 @@ from flask import Flask, render_template, session, redirect, flash
 from flask import url_for, request
 from perm import conn
 
-RATE_RE = "([a-z]*Rate[0-9]+)"
-rate_match = re.compile(RATE_RE)
-
-TAG_RE = "(tagged[0-9]+)"
-tag_match = re.compile(TAG_RE)
-
 app = Flask(__name__)
 app.static_folder = 'static'
 app.secret_key = "Doesn'tMatterRn"
@@ -491,24 +485,22 @@ def rate():
     user_email = session['userEmail']
     cursor = conn.cursor()
     page = 'index'
-    for item in request.form:
-        if re.match(rate_match, item):
-            if 'share' in item:
-                page = 'sharedPosts'
-            cursor.rownumber = 0
-            rate_id = int(item.split('te')[-1])
-            query = "SELECT * FROM Rate WHERE item_id = %s AND email = %s"
-            cursor.execute(query, (rate_id, user_email))
-            rate_exist = cursor.fetchone()
-            cursor.rownumber = 0
-            if rate_exist:
-                query = "UPDATE Rate SET rate_time = CURRENT_TIMESTAMP, emoji = %s WHERE item_id = %s AND email = %s"
-                cursor.execute(query, (request.form[item], rate_id, user_email))
-            else:
-                query = "INSERT INTO Rate (email, item_id, rate_time, emoji) VALUES (%s, %s, CURRENT_TIMESTAMP, %s)"
-                cursor.execute(query, (user_email, rate_id, request.form[item]))
-            conn.commit()
-            break
+    item = list(request.form.keys())[0]
+    if 'share' in item:
+        page = 'sharedPosts'
+    cursor.rownumber = 0
+    rate_id = int(item.split('te')[-1])
+    query = "SELECT * FROM Rate WHERE item_id = %s AND email = %s"
+    cursor.execute(query, (rate_id, user_email))
+    rate_exist = cursor.fetchone()
+    cursor.rownumber = 0
+    if rate_exist:
+        query = "UPDATE Rate SET rate_time = CURRENT_TIMESTAMP, emoji = %s WHERE item_id = %s AND email = %s"
+        cursor.execute(query, (request.form[item], rate_id, user_email))
+    else:
+        query = "INSERT INTO Rate (email, item_id, rate_time, emoji) VALUES (%s, %s, CURRENT_TIMESTAMP, %s)"
+        cursor.execute(query, (user_email, rate_id, request.form[item]))
+    conn.commit()
     cursor.close()
     return redirect(url_for(page))
 
@@ -547,38 +539,36 @@ def tag_auth():
 def tag():
     user_email = session['userEmail']
     cursor = conn.cursor()
-    for item in request.form:
-        if re.match(tag_match, item):
-            taggee = request.form[item]
-            cursor.rownumber = 0
-            tag_id = int(item.split('d')[-1])
-            query = "SELECT * FROM Tag WHERE item_id = %s AND email_tagger = %s AND email_tagged = %s"
-            cursor.execute(query, (tag_id, user_email, taggee))
-            tag_exist = cursor.fetchone()
-            cursor.rownumber = 0
-            if not tag_exist:
-                query = "SELECT is_pub FROM ContentItem WHERE item_id = %s"
-                cursor.execute(query, tag_id)
-                is_public = cursor.fetchone()
-                cursor.rownumber = 0
-                if is_public['is_pub']:
-                    status = "False"
-                    if user_email == taggee:
-                        status = "True"
-                    query = "INSERT INTO Tag(email_tagged, email_tagger, item_id, status) VALUES (%s, %s, %s, %s)"
-                    cursor.execute(query, (taggee, user_email, tag_id, status))
-                else:
-                    query = "SELECT * FROM Belong NATURAL JOIN Share WHERE email = %s AND item_id = %s"
-                    cursor.execute(query, (taggee, tag_id))
-                    is_shared = cursor.fetchone()
-                    if is_shared:
-                        query = "INSERT INTO Tag(email_tagged, email_tagger, item_id, status) VALUES (%s, %s, %s, %s)"
-                        cursor.execute(query, (taggee, user_email, tag_id, "False"))
-                    else:
-                        error = "Tag request cannot be done."
-                        return redirect(url_for('index', tagError=error))
-            conn.commit()
-            break
+    item = list(request.form.keys())[0]
+    taggee = request.form[item]
+    cursor.rownumber = 0
+    tag_id = int(item.split('d')[-1])
+    query = "SELECT * FROM Tag WHERE item_id = %s AND email_tagger = %s AND email_tagged = %s"
+    cursor.execute(query, (tag_id, user_email, taggee))
+    tag_exist = cursor.fetchone()
+    cursor.rownumber = 0
+    if not tag_exist:
+        query = "SELECT is_pub FROM ContentItem WHERE item_id = %s"
+        cursor.execute(query, tag_id)
+        is_public = cursor.fetchone()
+        cursor.rownumber = 0
+        if is_public['is_pub']:
+            status = "False"
+            if user_email == taggee:
+                status = "True"
+            query = "INSERT INTO Tag(email_tagged, email_tagger, item_id, status) VALUES (%s, %s, %s, %s)"
+            cursor.execute(query, (taggee, user_email, tag_id, status))
+        else:
+            query = "SELECT * FROM Belong NATURAL JOIN Share WHERE email = %s AND item_id = %s"
+            cursor.execute(query, (taggee, tag_id))
+            is_shared = cursor.fetchone()
+            if is_shared:
+                query = "INSERT INTO Tag(email_tagged, email_tagger, item_id, status) VALUES (%s, %s, %s, %s)"
+                cursor.execute(query, (taggee, user_email, tag_id, "False"))
+            else:
+                error = "Tag request cannot be done."
+                return redirect(url_for('index', tagError=error))
+    conn.commit()
     cursor.close()
     return redirect(url_for('index'))
 
