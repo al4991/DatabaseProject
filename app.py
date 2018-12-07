@@ -568,6 +568,9 @@ def tag():
             else:
                 error = "Tag request cannot be done."
                 return redirect(url_for('index', tagError=error))
+    else:
+        error = "You already tagged " + taggee + " for this post!"
+        return redirect(url_for('index', tagError=error))
     conn.commit()
     cursor.close()
     return redirect(url_for('index'))
