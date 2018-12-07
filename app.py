@@ -545,6 +545,13 @@ def tag():
     taggee = request.form[item]
     cursor.rownumber = 0
     tag_id = int(item.split('d')[-1])
+    query = "SELECT * FROM Person WHERE email = %s"
+    cursor.execute(query, taggee)
+    tag_email_exist = cursor.fetchone()
+    if not tag_email_exist:
+        error = "This email has not been registered."
+        flash(error)
+        return redirect(url_for('index'))
     query = "SELECT * FROM Tag WHERE item_id = %s AND email_tagger = %s AND email_tagged = %s"
     cursor.execute(query, (tag_id, user_email, taggee))
     tag_exist = cursor.fetchone()
@@ -570,7 +577,7 @@ def tag():
             else:
                 error = "Tag request cannot be done."
                 flash(error)
-                return redirect(url_for('index', tagError=error))
+                return redirect(url_for('index'))
     else:
         error = "You already tagged " + taggee + " for this post!"
         flash(error)
