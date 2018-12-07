@@ -13,38 +13,7 @@
 
     <body>
         <div id="container">
-            <div id="leftColumn">
-                <div id="pendingReq">
-                    <h3><a href="{{ url_for('pending_tag') }}">Pending Tags</a></h3>
-                </div>
-                <div id="sharedPosts">
-                    <h3><a href="{{ url_for('sharedPosts') }}">Shared Posts</a></h3>
-                </div>
-                <div id="myGroup">
-                    <h3> My Groups </h3>
-                    <a class="btn" href="{{ url_for('newGroup') }}"><button id="newGroupButton"> + </button></a>
 
-                    {% for line in ownedGroups %}
-                        <ul> {{line.fg_name}} </ul>
-                        <a id="addMemberButton" class="btn" href="{{ url_for('addMember', nameGroup=line.fg_name) }}">
-                            <button id="addMemberButton"> + </button></a>
-                        <a id ="removeMemButton" class="btn" href="{{ url_for('removeMember', nameGroup=line.fg_name) }}">
-                            <button id="removeMemButton"> - </button></a>
-                    {% endfor %}
-
-                </div>
-
-                <div id="memberGroups">
-                    <h3> Member </h3>
-
-                    {% for line in memberGroups %}
-                        <ul> {{line.fg_name}} </ul>
-                    {% endfor %}
-
-                </div>
-            </div>
-
-            <div id="rightColumn">
 
                 {% for line in shares %}
 
@@ -124,7 +93,6 @@
                     </div>
                     </br>
                 {% endfor %}
-            </div>
         </div>
     </body>
 </html>
