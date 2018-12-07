@@ -5,7 +5,59 @@
     <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='./css/comments.css') }}">
     <title> Please no toxic ^_^ </title>
     <style type="text/css">
-        
+        html, 
+body {
+    background:#c5d9f9;
+}
+a#Home {
+    position: absolute;
+    left:0;
+    margin-left:10px;
+    text-decoration: none;
+    background: #b19cd9;
+    color:white;
+    border: 10px solid #b19cd9;
+    border-radius:5px;
+    transition:0.5s;
+}
+a#Home:hover {
+    color: #b19cd9;
+    background: white;
+    border: 10px solid white;
+}
+div#container{
+    position:relative;
+    /*top:20px;*/
+    width:100%;
+}
+div#post {
+    position: absolute;
+    width:550px;
+    font-size:20px;
+    padding:10px;
+    border:5px solid white;
+    left:20px;
+    text-align:center;
+    top:0;
+}
+div#allComments {
+    position:absolute;
+    width:550px;
+    right:30px;
+    padding:10px;
+    border:5px solid white;
+    top:0;
+}
+div#newComment {
+    margin-bottom:8px;
+}
+div#commentData {
+    margin-left:10px;
+}
+input{
+    background:white;
+    border:#b19cd9;
+}
     </style>
 </head>
 <body>
