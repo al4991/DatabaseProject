@@ -35,5 +35,14 @@ Additional features:
 - Comments  
   - Users are able to comment on each post. Upon clicking the comment button for the post,  
     the user is redirected to another page, displaying the post and a list of current comments.   
-    On that page, the user is able to submit a comment. 
- 
+    On that page, the user is able to submit a comment.   
+   
+ Contributions  
+  - Andrew implemented comments, posting and sharing  
+  - Cindy implemented ratings, the tagging system  
+  - Carolyn implemented friendgroups and a number of related features (add/de friend, add/remove group)     
+    as well as implementing the filtering feature AND writing the CSS.   
+  - Login/Register was a group effort, as well as maintaining the Home page as we implemented   
+    more and more features. 
+  - Maintaining the html was also a group effort.
+    
