@@ -14,7 +14,7 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 
 @app.route("/", methods=['GET', 'POST'])
-def index(tagError=None):
+def index():
     sessionBool = False
     friendData = None
     memberData = None
@@ -67,7 +67,7 @@ def index(tagError=None):
         return render_template('index.html', ownedGroups=friendData,
                                memberGroups=memberData, posts=data,
                                rates=rate_data, rate_stats=rate_stats,
-                               email=session['userEmail'], tagError=tagError,
+                               email=session['userEmail'],
                                contentType=contentType, tags=tagged_items)
     else:
         return render_template('index.html', posts=data,
@@ -575,7 +575,7 @@ def tag():
     else:
         error = "You already tagged " + taggee + " for this post!"
         flash(error)
-        return redirect(url_for('index', tagError=error))
+        return redirect(url_for('index'))
     conn.commit()
     cursor.close()
     return redirect(url_for('index'))
