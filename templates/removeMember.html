@@ -17,11 +17,12 @@
 			<div id="container">
 			<input type="hidden" name="deleteGroup" value="{{nameGroup}}">
 			{% for line in nameData %}
-
-			<ul> {{line.fname}} {{line.lname}} {{line.email}} </ul>
-			<input id="removebtn" type="submit" name="Remove" value="Remove">
-			<input id="severbtn" type="submit" name="Sever" value="Sever">
-			<input type="hidden" name="memberEmail" value="{{line.email}}">
+				{% if user != line.email %}
+					<ul> {{line.fname}} {{line.lname}} {{line.email}} </ul>
+					<input id="removebtn" type="submit" name="Remove" value="Remove">
+					<input id="severbtn" type="submit" name="Sever" value="Sever">
+					<input type="hidden" name="memberEmail" value="{{line.email}}">
+				{% endif %}
 			{% endfor %}
 			{% if not error %}
 			<input id="deletebtn" type="submit" name="Delete" value="Delete">

@@ -65,7 +65,8 @@ a#Home02:hover{
 	border-top:1px solid white;
 }
 
-input#nameInput {
+input#nameInputFname,
+input#nameInputLname {
 	position: relative;
 	top:-20px;
 }
