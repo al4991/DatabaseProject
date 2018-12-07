@@ -280,7 +280,7 @@ VALUES('GG@nyu.edu', NULL, 'gg3', 'text', False);
 
 -- Testing Tag case :)
 INSERT INTO tag (email_tagged, email_tagger, item_id, status)
-VALUES ('CC@nyu.edu', 'FF@nyu.edu', 31, True);
+VALUES ('CC@nyu.edu', 'FF@nyu.edu', 31, 'True');
 
 INSERT INTO tag (email_tagged, email_tagger, item_id, status)
-VALUES('AA@nyu.edu', 'CC@nyu.edu', 31, True);
+VALUES('AA@nyu.edu', 'CC@nyu.edu', 31, 'True');
