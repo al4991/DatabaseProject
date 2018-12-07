@@ -1,5 +1,4 @@
 import os
-import re
 from flask import Flask, render_template, session, redirect, flash
 from flask import url_for, request
 from perm import conn
@@ -51,12 +50,14 @@ def index(tagError=None):
         rate_data = cursor.fetchall()
         cursor.rownumber = 0
 
-        tag_query = "SELECT item_id, fname, lname FROM Tag NATURAL JOIN Person WHERE email_tagged = email"
+        tag_query = "SELECT item_id, fname, lname" \
+                    "FROM Tag NATURAL JOIN Person WHERE email_tagged = email"
         cursor.execute(tag_query)
         tagged_items = cursor.fetchall()
         cursor.rownumber = 0
 
-    query = "SELECT item_id, emoji, count(*) AS emoji_count FROM Rate GROUP BY item_id, emoji"
+    query = "SELECT item_id, emoji, count(*) AS emoji_count FROM Rate" \
+            " GROUP BY item_id, emoji"
     cursor.execute(query)
     rate_stats = cursor.fetchall()
 
@@ -300,7 +301,8 @@ def removeMember(nameGroup):
                 cursor.execute(nameQuery, searchEmail)
                 nameData.extend(cursor.fetchall())
             cursor.close()
-            return render_template('removeMember.html', memNames=memNames, nameGroup=nameGroup, nameData=nameData)
+            return render_template('removeMember.html', memNames=memNames,
+                                   nameGroup=nameGroup, nameData=nameData)
         else:
             # if there are no members the group will be deleted
             cursor = conn.cursor()
@@ -526,9 +528,11 @@ def tag_auth():
         tagger, item_id = lst[0], int(lst[1])
         status = request.form[item]
         if status == "Accept":
-            query = "UPDATE Tag SET status = 'True' WHERE email_tagger = %s AND email_tagged = %s AND item_id = %s"
+            query = "UPDATE Tag SET status = 'True' WHERE email_tagger = %s" \
+                    " AND email_tagged = %s AND item_id = %s"
         else:
-            query = "DELETE FROM Tag WHERE email_tagger = %s AND email_tagged = %s AND item_id = %s"
+            query = "DELETE FROM Tag WHERE email_tagger = %s" \
+                    "AND email_tagged = %s AND item_id = %s"
         cursor.execute(query, (tagger+'@nyu.edu', user_email, item_id))
         conn.commit()
     cursor.close()
