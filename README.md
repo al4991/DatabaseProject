@@ -39,7 +39,8 @@ Additional features:
    
  Contributions  
   - Andrew implemented comments, posting and sharing  
-  - Cindy implemented ratings, the tagging system  
+  - Cindy implemented ratings and the tagging system (including accepting, pending, and rejecting requests). 
+  Cindy performed project testing and debugging. 
   - Carolyn implemented friendgroups and a number of related features (add/de friend, add/remove group)     
     as well as implementing the filtering feature AND writing the CSS.   
   - Login/Register was a group effort, as well as maintaining the Home page as we implemented   
