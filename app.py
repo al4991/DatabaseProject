@@ -23,11 +23,9 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 @app.route("/", methods=['GET', 'POST'])
 def index(tagError=None):
     sessionBool = False
-    contentType = None
     friendData = None
     memberData = None
     rate_data = None
-    rate_stats = None
     tagged_items = None
 
     if 'userEmail' in session:
@@ -35,8 +33,10 @@ def index(tagError=None):
     try:
         contentType = request.form['contentType']
         print(contentType)
+
     except Exception:
         contentType = "All"
+
     data = content(sessionBool, contentType)
     cursor = conn.cursor()
     # adding name of group that you own
@@ -82,7 +82,7 @@ def index(tagError=None):
 
 def content(inSession, contentType):
     cursor = conn.cursor()
-    if (inSession):
+    if inSession:
         if contentType == "Text":
             query = "SELECT * FROM ContentItem WHERE (is_pub = 1 OR email_post = %s) AND" \
                     " content_type = 'text' ORDER BY post_time DESC"
@@ -263,7 +263,7 @@ def sharedPosts():
         user_email = session['userEmail']
         cursor = conn.cursor()
         query = "SELECT * FROM Share NATURAL JOIN Belong NATURAL JOIN ContentItem WHERE email = %s"
-        cursor.execute(query, (user_email))
+        cursor.execute(query, user_email)
         shares = cursor.fetchall()
         cursor.rownumber = 0
 
@@ -518,7 +518,7 @@ def pending_tag():
     user_email = session['userEmail']
     cursor = conn.cursor()
     query = "SELECT * FROM Tag NATURAL JOIN ContentItem WHERE email_tagged = %s AND status = 'False'"
-    cursor.execute(query, (user_email))
+    cursor.execute(query, user_email)
     pends = cursor.fetchall()
     cursor.close()
 
@@ -533,7 +533,6 @@ def tag_auth():
         lst = item.split('@nyu.edu')
         tagger, item_id = lst[0], int(lst[1])
         status = request.form[item]
-        query = ""
         if status == "Accept":
             query = "UPDATE Tag SET status = 'True' WHERE email_tagger = %s AND email_tagged = %s AND item_id = %s"
         else:
@@ -559,7 +558,7 @@ def tag():
             cursor.rownumber = 0
             if not tag_exist:
                 query = "SELECT is_pub FROM ContentItem WHERE item_id = %s"
-                cursor.execute(query, (tag_id))
+                cursor.execute(query, tag_id)
                 is_public = cursor.fetchone()
                 cursor.rownumber = 0
                 if is_public['is_pub']:
@@ -596,17 +595,18 @@ def comments(postid):
 
         query2 = 'SELECT * FROM ContentItem WHERE item_id = %s'
         cursor.execute(query2, postid)
-        post = cursor.fetchone()
+        main_post = cursor.fetchone()
         cursor.close()
-        return render_template('comments.html', data=data, post=post, postid=postid)
+        return render_template('comments.html', data=data, post=main_post, postid=postid)
+
 
 @app.route('/commentsubmit/<postid>', methods=['GET', 'POST'])
 def commentsubmit(postid):
     if 'userEmail' in session:
-        content = request.form['content']
+        comment_content = request.form['content']
         query = 'INSERT INTO comments (content, commentor_email, item_id) VALUES (%s, %s, %s)'
         cursor = conn.cursor()
-        cursor.execute(query, (content, session['userEmail'], postid))
+        cursor.execute(query, (comment_content, session['userEmail'], postid))
         conn.commit()
         cursor.close()
     return redirect(url_for('comments', postid=postid))
