@@ -29,7 +29,7 @@
 			<br>
 			<input type="hidden" name="groupName" value="{{ dispGroupName }}">
 			<input type="text" name="newMemFname" placeholder="first name" id="nameInputFname"required>
-			<input type="text" name="newMemLname" placeholder="last name" id="nameInputLname">
+			<input type="text" name="newMemLname" placeholder="last name" id="nameInputLname" required>
 			
 			{% if duplicate %}
 			<input type="hidden" name="duplicateTest" value="True">
