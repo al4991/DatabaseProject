@@ -199,26 +199,30 @@ def post():
     blog = request.form['content']
     pub = request.form.get('pub')
     file = request.files.getlist('image')
+
     destination = None
     if file:
         contentType = "image"
+        # the three lines below are to create the path if it doesn't exist already
         target = app.config['UPLOAD_FOLDER']+'/images'
         if not os.path.isdir(target):
             os.makedirs(target)
-
+        # loop through submitted images
         for file in request.files.getlist('image'):
             filename = file.filename
             destination = "/".join([target, filename])
+
     else:
         contentType = "text"
 
     pub = True if pub else False
-
+    # This query just throws the post info we got into the contentitem table
     query = 'INSERT INTO ContentItem(email_post, file_path, content_type, item_name, is_pub) VALUES(%s, %s, %s, %s, %s)'
     cursor.execute(query, (user_email, destination, contentType, blog, pub))
-
+    # if there was a photo, make sure we saved it
     if file:
         file.save(destination)
+    # commit our changes
     conn.commit()
     cursor.close()
     return redirect(url_for('index'))
@@ -245,18 +249,21 @@ def newGroup():
 @app.route('/share/<postid>')
 def share(postid):
     if 'userEmail' in session:
+        # This query is to select all the groups that we can share this post with.
+        # Makes sure we don't allow you to share with groups that you've already shared the post with
         query = 'SELECT owner_email, fg_name FROM belong  WHERE email = %s AND (owner_email, fg_name) ' \
                 'NOT IN (SELECT owner_email, fg_name FROM share WHERE item_id = %s)'
         cursor = conn.cursor()
         cursor.execute(query, (session['userEmail'], postid))
         data = cursor.fetchall()
         cursor.close()
+        # if there are no groups left to share with, just redirect home
         if data:
             return render_template('share.html', postid=postid, data=data)
 
     return redirect('/')
 
-
+# This route is just what commits the actual share after we select the group to share with.
 @app.route('/shareAction/<owner_email>/<fg_name>/<postid>', methods=['GET', 'POST'])
 def shareAction(owner_email, fg_name, postid):
     query = "INSERT INTO share VALUES (%s, %s, %s)"
@@ -531,23 +538,34 @@ def addNewMember():
                                    duplicate="true", memExist=memExist)
 
 
+# Retrieving what post a user rated on and with what emoji
+# current page (whether it is index or shared posts) will have the updated emoji after being redirected
 @app.route('/rate', methods=['GET', 'POST'])
 def rate():
     user_email = session['userEmail']
     cursor = conn.cursor()
     page = 'index'
     item = list(request.form.keys())[0]
+
+    # if the user is rating on the shared page, make page = sharedPosts
+    # otherwise, it is already initialized to index page
     if 'share' in item:
         page = 'sharedPosts'
     cursor.rownumber = 0
+    # retrieve the item_id of what is being rated 
     rate_id = int(item.split('te')[-1])
+
+    # determine whether the rating already exists
     query = "SELECT * FROM Rate WHERE item_id = %s AND email = %s"
     cursor.execute(query, (rate_id, user_email))
     rate_exist = cursor.fetchone()
     cursor.rownumber = 0
+
+    # if rating already exists, uopdate the row 
     if rate_exist:
         query = "UPDATE Rate SET rate_time = CURRENT_TIMESTAMP, emoji = %s WHERE item_id = %s AND email = %s"
         cursor.execute(query, (request.form[item], rate_id, user_email))
+    # otherwise, insert a new row for the rating
     else:
         query = "INSERT INTO Rate (email, item_id, rate_time, emoji) VALUES (%s, %s, CURRENT_TIMESTAMP, %s)"
         cursor.execute(query, (user_email, rate_id, request.form[item]))
@@ -556,10 +574,12 @@ def rate():
     return redirect(url_for(page))
 
 
+# displaying pending tag requests
 @app.route('/pendingTags', methods=['GET', 'POST'])
 def pending_tag():
     user_email = session['userEmail']
     cursor = conn.cursor()
+    # find all tag requests where status = false to display on tag page
     query = "SELECT * FROM Tag NATURAL JOIN ContentItem WHERE email_tagged = %s AND status = 'False'"
     cursor.execute(query, user_email)
     pends = cursor.fetchall()
@@ -568,6 +588,7 @@ def pending_tag():
     return render_template('pendingTags.html', pendings=pends)
 
 
+# confirming if user accepted or rejected tag
 @app.route('/tagAuth', methods=['GET', 'POST'])
 def tag_auth():
     user_email = session['userEmail']
@@ -576,9 +597,12 @@ def tag_auth():
         lst = item.split('@nyu.edu')
         tagger, item_id = lst[0], int(lst[1])
         status = request.form[item]
+
+        # if user accepted tag, update row in table to be true 
         if status == "Accept":
             query = "UPDATE Tag SET status = 'True' WHERE email_tagger = %s" \
                     " AND email_tagged = %s AND item_id = %s"
+        # otherwise, delete the row from the table
         else:
             query = "DELETE FROM Tag WHERE email_tagger = %s" \
                     "AND email_tagged = %s AND item_id = %s"
@@ -588,6 +612,10 @@ def tag_auth():
     return redirect(url_for('pending_tag'))
 
 
+# tagging a user 
+# if a user tags him/herself, the tag is automatically accepted
+# if a user tags another user who cannot view the post, generate an error and display on home
+# if a user already tagged the user, display an error saying that user is already tagged for post
 @app.route('/tag', methods=['GET', 'POST'])
 def tag():
     user_email = session['userEmail']
@@ -596,26 +624,39 @@ def tag():
     taggee = request.form[item]
     cursor.rownumber = 0
     tag_id = int(item.split('d')[-1])
+
+    # check to see if email to be tagged exist
     query = "SELECT * FROM Person WHERE email = %s"
     cursor.execute(query, taggee)
     tag_email_exist = cursor.fetchone()
+
+    # generate error if email does not exist on home page
     if not tag_email_exist:
         error = "This email has not been registered."
         flash(error)
         return redirect(url_for('index'))
+
+    # check to see if the tag already exists 
     query = "SELECT * FROM Tag WHERE item_id = %s AND email_tagger = %s AND email_tagged = %s"
     cursor.execute(query, (tag_id, user_email, taggee))
     tag_exist = cursor.fetchone()
     cursor.rownumber = 0
+
+    # if tag does not exist
     if not tag_exist:
+        # check to see if the content is public 
         query = "SELECT is_pub FROM ContentItem WHERE item_id = %s"
         cursor.execute(query, tag_id)
         is_public = cursor.fetchone()
         cursor.rownumber = 0
         if is_public['is_pub']:
             status = "False"
+
+            # if tagging yourself, automatically accept the tag
             if user_email == taggee:
                 status = "True"
+
+            # insert the pending/accepted tag into the tag table
             query = "INSERT INTO Tag(email_tagged, email_tagger, item_id, status) VALUES (%s, %s, %s, %s)"
             cursor.execute(query, (taggee, user_email, tag_id, status))
         else:
@@ -629,6 +670,7 @@ def tag():
                 error = "Tag request cannot be done."
                 flash(error)
                 return redirect(url_for('index'))
+    # generate error saying that email is already tagged 
     else:
         error = "You already tagged " + taggee + " for this post!"
         flash(error)
@@ -644,6 +686,7 @@ def tag():
 @app.route('/comments/<postid>', methods=['GET', 'POST'])
 def comments(postid):
     if 'userEmail' in session:
+        # just grabs all the comments linked to this
         query = 'SELECT content, commentor_email FROM comments WHERE item_id = %s'
         cursor = conn.cursor()
         cursor.execute(query, postid)
@@ -664,6 +707,7 @@ def comments(postid):
 def commentsubmit(postid):
     if 'userEmail' in session:
         comment_content = request.form['content']
+
         query = 'INSERT INTO comments (content, commentor_email, item_id) VALUES (%s, %s, %s)'
         cursor = conn.cursor()
         cursor.execute(query, (comment_content, session['userEmail'], postid))
