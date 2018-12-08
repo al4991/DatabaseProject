@@ -632,8 +632,8 @@ def tag():
     return redirect(url_for('index'))
 
 
-# selects the content and the email of whoever is commenting (whoever is logged in)
-
+# selects all the comments and the emails associated with the comment for a post 
+# selecting the post to display on the page
 @app.route('/comments/<postid>', methods=['GET', 'POST'])
 def comments(postid):
     if 'userEmail' in session:
