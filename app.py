@@ -537,7 +537,7 @@ def addNewMember():
                                        message=message)
         # if the user doesn't exist, an error message is sent
         elif len(memExist) == 0:
-            error = "This person does not exist, try another email"
+            error = "This person does not exist, try another name"
             cursor.close()
             return render_template('newGroup.html', displayAddMember="true", dispGroupName=groupName,
                                    error=error)
