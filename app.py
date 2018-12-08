@@ -245,7 +245,6 @@ def newGroup():
         return redirect('/')
 
 
-
 @app.route('/share/<postid>')
 def share(postid):
     if 'userEmail' in session:
@@ -274,26 +273,32 @@ def shareAction(owner_email, fg_name, postid):
     return redirect('/')
 
 
+# making the html page for shared posts
+# displays shared posts, with the tags and emojis associated with it 
 @app.route('/sharedPosts')
 def sharedPosts():
     if 'userEmail' in session:
         user_email = session['userEmail']
         cursor = conn.cursor()
+        # Fetching all the shared posts seen by the user
         query = "SELECT * FROM Share NATURAL JOIN Belong NATURAL JOIN ContentItem WHERE email = %s"
         cursor.execute(query, user_email)
         shares = cursor.fetchall()
         cursor.rownumber = 0
 
+        # Fetching all the emojis for emoji count of the shared posts
         query = "SELECT item_id, emoji, count(*) AS emoji_count FROM Rate GROUP BY item_id, emoji"
         cursor.execute(query)
         rate_stats = cursor.fetchall()
         cursor.rownumber = 0
 
+        # Fetch user's rating for the posts
         query = "SELECT item_id, emoji FROM Rate WHERE email = %s"
         cursor.execute(query, (session['userEmail']))
         rate_data = cursor.fetchall()
-
         cursor.rownumber = 0
+
+        # Fetch all the tags for each post
         query = "SELECT item_id, fname, lname" \
                 " FROM Tag NATURAL JOIN Person WHERE email_tagged = email and status = 'True'"
         cursor.execute(query)
@@ -666,13 +671,18 @@ def tag():
             # insert the pending/accepted tag into the tag table
             query = "INSERT INTO Tag(email_tagged, email_tagger, item_id, status) VALUES (%s, %s, %s, %s)"
             cursor.execute(query, (taggee, user_email, tag_id, status))
+
+        # if it's a private post, confirm that you are tagging someone who you already shared the post with 
         else:
             query = "SELECT * FROM Belong NATURAL JOIN Share WHERE email = %s AND item_id = %s"
             cursor.execute(query, (taggee, tag_id))
             is_shared = cursor.fetchone()
+            # if post is shared, insert row into table 
             if is_shared:
                 query = "INSERT INTO Tag(email_tagged, email_tagger, item_id, status) VALUES (%s, %s, %s, %s)"
                 cursor.execute(query, (taggee, user_email, tag_id, "False"))
+            # otherwise, all cases failed
+            # generate the error to the home page
             else:
                 error = "Tag request cannot be done."
                 flash(error)
