@@ -199,26 +199,30 @@ def post():
     blog = request.form['content']
     pub = request.form.get('pub')
     file = request.files.getlist('image')
+
     destination = None
     if file:
         contentType = "image"
+        # the three lines below are to create the path if it doesn't exist already
         target = app.config['UPLOAD_FOLDER']+'/images'
         if not os.path.isdir(target):
             os.makedirs(target)
-
+        # loop through submitted images
         for file in request.files.getlist('image'):
             filename = file.filename
             destination = "/".join([target, filename])
+
     else:
         contentType = "text"
 
     pub = True if pub else False
-
+    # This query just throws the post info we got into the contentitem table
     query = 'INSERT INTO ContentItem(email_post, file_path, content_type, item_name, is_pub) VALUES(%s, %s, %s, %s, %s)'
     cursor.execute(query, (user_email, destination, contentType, blog, pub))
-
+    # if there was a photo, make sure we saved it
     if file:
         file.save(destination)
+    # commit our changes
     conn.commit()
     cursor.close()
     return redirect(url_for('index'))
@@ -245,18 +249,21 @@ def newGroup():
 @app.route('/share/<postid>')
 def share(postid):
     if 'userEmail' in session:
+        # This query is to select all the groups that we can share this post with.
+        # Makes sure we don't allow you to share with groups that you've already shared the post with
         query = 'SELECT owner_email, fg_name FROM belong  WHERE email = %s AND (owner_email, fg_name) ' \
                 'NOT IN (SELECT owner_email, fg_name FROM share WHERE item_id = %s)'
         cursor = conn.cursor()
         cursor.execute(query, (session['userEmail'], postid))
         data = cursor.fetchall()
         cursor.close()
+        # if there are no groups left to share with, just redirect home
         if data:
             return render_template('share.html', postid=postid, data=data)
 
     return redirect('/')
 
-
+# This route is just what commits the actual share after we select the group to share with.
 @app.route('/shareAction/<owner_email>/<fg_name>/<postid>', methods=['GET', 'POST'])
 def shareAction(owner_email, fg_name, postid):
     query = "INSERT INTO share VALUES (%s, %s, %s)"
@@ -613,6 +620,7 @@ def tag():
 @app.route('/comments/<postid>', methods=['GET', 'POST'])
 def comments(postid):
     if 'userEmail' in session:
+        # just grabs all the comments linked to this
         query = 'SELECT content, commentor_email FROM comments WHERE item_id = %s'
         cursor = conn.cursor()
         cursor.execute(query, postid)
@@ -633,6 +641,7 @@ def comments(postid):
 def commentsubmit(postid):
     if 'userEmail' in session:
         comment_content = request.form['content']
+
         query = 'INSERT INTO comments (content, commentor_email, item_id) VALUES (%s, %s, %s)'
         cursor = conn.cursor()
         cursor.execute(query, (comment_content, session['userEmail'], postid))
