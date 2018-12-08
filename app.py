@@ -526,10 +526,12 @@ def rate():
     return redirect(url_for(page))
 
 
+# displaying pending tag requests
 @app.route('/pendingTags', methods=['GET', 'POST'])
 def pending_tag():
     user_email = session['userEmail']
     cursor = conn.cursor()
+    # find all tag requests where status = false to display on tag page
     query = "SELECT * FROM Tag NATURAL JOIN ContentItem WHERE email_tagged = %s AND status = 'False'"
     cursor.execute(query, user_email)
     pends = cursor.fetchall()
@@ -538,6 +540,7 @@ def pending_tag():
     return render_template('pendingTags.html', pendings=pends)
 
 
+# confirming if user accepted or rejected tag
 @app.route('/tagAuth', methods=['GET', 'POST'])
 def tag_auth():
     user_email = session['userEmail']
@@ -546,9 +549,12 @@ def tag_auth():
         lst = item.split('@nyu.edu')
         tagger, item_id = lst[0], int(lst[1])
         status = request.form[item]
+
+        # if user accepted tag, update row in table to be true 
         if status == "Accept":
             query = "UPDATE Tag SET status = 'True' WHERE email_tagger = %s" \
                     " AND email_tagged = %s AND item_id = %s"
+        # otherwise, delete the row from the table
         else:
             query = "DELETE FROM Tag WHERE email_tagger = %s" \
                     "AND email_tagged = %s AND item_id = %s"
@@ -558,6 +564,10 @@ def tag_auth():
     return redirect(url_for('pending_tag'))
 
 
+# tagging a user 
+# if a user tags him/herself, the tag is automatically accepted
+# if a user tags another user who cannot view the post, generate an error and display on home
+# if a user already tagged the user, display an error saying that user is already tagged for post
 @app.route('/tag', methods=['GET', 'POST'])
 def tag():
     user_email = session['userEmail']
@@ -566,26 +576,39 @@ def tag():
     taggee = request.form[item]
     cursor.rownumber = 0
     tag_id = int(item.split('d')[-1])
+
+    # check to see if email to be tagged exist
     query = "SELECT * FROM Person WHERE email = %s"
     cursor.execute(query, taggee)
     tag_email_exist = cursor.fetchone()
+
+    # generate error if email does not exist on home page
     if not tag_email_exist:
         error = "This email has not been registered."
         flash(error)
         return redirect(url_for('index'))
+
+    # check to see if the tag already exists 
     query = "SELECT * FROM Tag WHERE item_id = %s AND email_tagger = %s AND email_tagged = %s"
     cursor.execute(query, (tag_id, user_email, taggee))
     tag_exist = cursor.fetchone()
     cursor.rownumber = 0
+
+    # if tag does not exist
     if not tag_exist:
+        # check to see if the content is public 
         query = "SELECT is_pub FROM ContentItem WHERE item_id = %s"
         cursor.execute(query, tag_id)
         is_public = cursor.fetchone()
         cursor.rownumber = 0
         if is_public['is_pub']:
             status = "False"
+
+            # if tagging yourself, automatically accept the tag
             if user_email == taggee:
                 status = "True"
+
+            # insert the pending/accepted tag into the tag table
             query = "INSERT INTO Tag(email_tagged, email_tagger, item_id, status) VALUES (%s, %s, %s, %s)"
             cursor.execute(query, (taggee, user_email, tag_id, status))
         else:
@@ -599,6 +622,7 @@ def tag():
                 error = "Tag request cannot be done."
                 flash(error)
                 return redirect(url_for('index'))
+    # generate error saying that email is already tagged 
     else:
         error = "You already tagged " + taggee + " for this post!"
         flash(error)
