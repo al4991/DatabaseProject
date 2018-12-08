@@ -199,26 +199,30 @@ def post():
     blog = request.form['content']
     pub = request.form.get('pub')
     file = request.files.getlist('image')
+
     destination = None
     if file:
         contentType = "image"
+        # the three lines below are to create the path if it doesn't exist already
         target = app.config['UPLOAD_FOLDER']+'/images'
         if not os.path.isdir(target):
             os.makedirs(target)
-
+        # loop through submitted images
         for file in request.files.getlist('image'):
             filename = file.filename
             destination = "/".join([target, filename])
+
     else:
         contentType = "text"
 
     pub = True if pub else False
-
+    # This query just throws the post info we got into the contentitem table
     query = 'INSERT INTO ContentItem(email_post, file_path, content_type, item_name, is_pub) VALUES(%s, %s, %s, %s, %s)'
     cursor.execute(query, (user_email, destination, contentType, blog, pub))
-
+    # if there was a photo, make sure we saved it
     if file:
         file.save(destination)
+    # commit our changes
     conn.commit()
     cursor.close()
     return redirect(url_for('index'))
@@ -245,18 +249,21 @@ def newGroup():
 @app.route('/share/<postid>')
 def share(postid):
     if 'userEmail' in session:
+        # This query is to select all the groups that we can share this post with.
+        # Makes sure we don't allow you to share with groups that you've already shared the post with
         query = 'SELECT owner_email, fg_name FROM belong  WHERE email = %s AND (owner_email, fg_name) ' \
                 'NOT IN (SELECT owner_email, fg_name FROM share WHERE item_id = %s)'
         cursor = conn.cursor()
         cursor.execute(query, (session['userEmail'], postid))
         data = cursor.fetchall()
         cursor.close()
+        # if there are no groups left to share with, just redirect home
         if data:
             return render_template('share.html', postid=postid, data=data)
 
     return redirect('/')
 
-
+# This route is just what commits the actual share after we select the group to share with.
 @app.route('/shareAction/<owner_email>/<fg_name>/<postid>', methods=['GET', 'POST'])
 def shareAction(owner_email, fg_name, postid):
     query = "INSERT INTO share VALUES (%s, %s, %s)"
@@ -299,6 +306,7 @@ def sharedPosts():
         return redirect(url_for('index'))
 
 
+# renders page to allow user to add people to the group that they've selected
 @app.route('/addMember/<nameGroup>')
 def addMember(nameGroup):
     if 'userEmail' in session:
@@ -307,18 +315,23 @@ def addMember(nameGroup):
         return redirect('/')
 
 
+#displays the members of the group chosen by the user
 @app.route('/removeMember/<nameGroup>', methods=['GET', 'POST'])
 def removeMember(nameGroup):
     if 'userEmail' in session:
         useremail = session['userEmail']
         cursor = conn.cursor()
+        # selects the members of the people who belong in the user's group
         showMemQuery = 'SELECT * FROM Belong WHERE fg_name = %s AND email != %s AND owner_email=%s'
         cursor.execute(showMemQuery, (nameGroup, useremail, useremail))
         memNames = cursor.fetchall()
+        # if there are members in the group
+        # nameData is an array with the first and last names of people in the group
         if memNames:
             nameData = []
             for x in range(len(memNames)):
                 searchEmail = memNames[x]['email']
+                # query to select first and last name of associated email
                 nameQuery = 'SELECT * FROM Person WHERE email = (%s)'
                 cursor.execute(nameQuery, searchEmail)
                 nameData.extend(cursor.fetchall())
@@ -351,12 +364,18 @@ def removeMember(nameGroup):
         return redirect('/')
 
 
+# removes a user from a selected group
+# user can delete them - meaning they remove the person from their group
+# user can sever their relationship with someone -- they remove a persoon from all of their groups
+# severing also removes the user from the groups that they belonged in owned by whoever they severed relationship with
+# user can also delete the group
 @app.route('/deleteMember', methods=['GET', 'POST'])
 def deleteMember():
     if 'userEmail' in session:
         useremail = session['userEmail']
         deletePerson = request.form['memberEmail']
         fromGroup = request.form['deleteGroup']
+        # remove deletes a person from the selected group
         if request.form.get('Remove') == 'Remove':
             cursor = conn.cursor()
             # delete a person from your group
@@ -365,6 +384,7 @@ def deleteMember():
             conn.commit()
             cursor.close()
             return removeMember(fromGroup)
+
         # if you want to completely sever your relationship with the person
         elif request.form.get('Sever') == 'Sever':
             cursor = conn.cursor()
@@ -380,21 +400,22 @@ def deleteMember():
             conn.commit()
             cursor.close()
             return removeMember(fromGroup)
+        # deletes the whole group which also deletes the shared content 
         elif request.form.get('Delete') == 'Delete':
             cursor = conn.cursor()
-            # delete everyone from belong
+            # query delete everyone from belong table
             deleteQuery4 = 'DELETE FROM Belong WHERE owner_email = %s AND fg_name = %s'
             cursor.execute(deleteQuery4, (useremail, fromGroup))
             conn.commit()
             conn.rownumber = 0
 
-            # delete the shared content
+            # query deletes the shared content associated with the user's group
             deleteQuery5 = 'DELETE FROM Share WHERE owner_email = %s AND fg_name = %s'
             cursor.execute(deleteQuery5, (useremail, fromGroup))
             conn.commit()
             conn.rownumber = 0
 
-            # delete the group
+            # deletes the group from the database
             deleteQuery6 = 'DELETE FROM FriendGroup WHERE owner_email = %s AND fg_name = %s'
             cursor.execute(deleteQuery6, (useremail, fromGroup))
             conn.commit()
@@ -407,14 +428,16 @@ def deleteMember():
         return redirect('/')
 
 
+# allows user to add new group that they own
+# the user can only create groups that don't already exist
 @app.route('/createNewGroup', methods=['GET', 'POST'])
 def createNewGroup():
     user_email = session['userEmail']
     groupName = request.form['groupName']
     groupDesc = request.form['groupDesc']
 
-    # Check if group already exists!!!!
     cursor = conn.cursor()
+    # the query checks is the user already owns a group with the inputted name
     checkQuery = 'SELECT fg_name FROM FriendGroup WHERE owner_email = %s AND fg_name = %s'
     cursor.execute(checkQuery, (user_email, groupName))
     groupData = cursor.fetchone()
@@ -424,6 +447,8 @@ def createNewGroup():
         error = "You have already created a group with this name"
         cursor.close()
         return render_template('newGroup.html', displayNewGroup="true", error=error)
+    # the group doesn't exist so the group is created with the user as the owner
+    # the owner is automatically put into the Belong table so they are a member of the group they own
     else:
         newGroupQuery = 'INSERT INTO FriendGroup(owner_email, fg_name, description) VALUES (%s,%s,%s)'
         cursor.execute(newGroupQuery, (user_email, groupName, groupDesc))
@@ -433,12 +458,16 @@ def createNewGroup():
         cursor.execute(addSelf,(user_email,user_email,groupName))
         conn.commit()
         cursor.close()
+        # allows the user to add members to the group they just created
         if request.form.get('AddMember') == 'AddMember':
             return render_template('newGroup.html', displayAddMember="true", dispGroupName=groupName)
     cursor.close()
     return redirect(url_for('index'))
 
 
+# user is allowed to add members to whichever group they selected
+# user adds by inputting the first and last name of the user
+# if is more than one user with the same name, the email is required
 @app.route('/addNewMember', methods=['GET', 'POST'])
 def addNewMember():
     user_email = session['userEmail']
@@ -446,11 +475,13 @@ def addNewMember():
     newMemberF = request.form['newMemFname']
     newMemberL = request.form['newMemLname']
     duplicateTest = request.form['duplicateTest']
-    # check that the member you're adding exists
+
     cursor = conn.cursor()
+    # check that the member you're adding exists
     checkExist = 'SELECT * FROM Person WHERE fname = %s AND lname = %s'
     cursor.execute(checkExist, (newMemberF, newMemberL))
     memExist = cursor.fetchall()
+    # if there is more than one user, an email is required
     if duplicateTest == "True":
         cursor.rownumber = 0
         newMemEmail = request.form['newMemEmail']
@@ -458,11 +489,12 @@ def addNewMember():
         checkInQuery = 'SELECT * FROM Belong WHERE owner_email = %s AND fg_name = %s AND email = %s'
         cursor.execute(checkInQuery, (user_email, groupName, newMemEmail))
         memExistData2 = cursor.fetchall()
-        # if the member already exists
+        # if the member already in user's group, the user retrieves an error message
         if memExistData2:
             cursor.close()
             error = "This person is already in your group"
             return render_template('newGroup.html', displayAddMember="true", dispGroupName=groupName, error=error)
+        # if the user exists and isn't in the group, they are added
         else:
             cursor.rownumber = 0
             addMemQuery2 = 'INSERT INTO Belong (email, owner_email, fg_name) VALUES (%s, %s, %s)'
@@ -471,7 +503,10 @@ def addNewMember():
             conn.commit()
             cursor.close()
             return render_template('newGroup.html', displayAddMember="true", dispGroupName=groupName, message=message)
+    
+    #if we don't know if there are duplicates, we have to check the how many people have the same name
     else:
+        # if there is only one person with the inputted name
         if len(memExist) == 1:
             cursor.rownumber = 0
             # if the member exists - check if they're already in your group
@@ -486,7 +521,7 @@ def addNewMember():
                 return render_template('newGroup.html', displayAddMember="true", dispGroupName=groupName,
                                        error=error)
             else:
-                # member exists and is not in group so add the to your group
+                # if the member exists and is not in group, add them to your group
                 cursor.rownumber = 0
                 addMemberQuery = 'INSERT INTO Belong (email, owner_email, fg_name) VALUES (%s, %s, %s)'
                 cursor.execute(addMemberQuery, (newMember, user_email, groupName))
@@ -495,13 +530,15 @@ def addNewMember():
                 cursor.close()
                 return render_template('newGroup.html', displayAddMember="true", dispGroupName=groupName,
                                        message=message)
-
+        # if the user doesn't exist, an error message is sent
         elif len(memExist) == 0:
             error = "This person does not exist, try another email"
             cursor.close()
             return render_template('newGroup.html', displayAddMember="true", dispGroupName=groupName,
                                    error=error)
-
+        # if the query returns something longer than one, that means there are multiple people with the same name
+        # will render the page with an error message and a list of the emails associated with that name
+        # the user must enter the correct email to add the person
         else:
             error = "There are multiple people with the same name. Enter the correct email and to move on"
             return render_template('newGroup.html', displayAddMember="true", dispGroupName=groupName, error=error,
@@ -652,9 +689,11 @@ def tag():
 
 # selects all the comments and the emails associated with the comment for a post 
 # selecting the post to display on the page
+# when user selects a post to comment on, they see the post and the comments previously done
 @app.route('/comments/<postid>', methods=['GET', 'POST'])
 def comments(postid):
     if 'userEmail' in session:
+        # just grabs all the comments linked to this
         query = 'SELECT content, commentor_email FROM comments WHERE item_id = %s'
         cursor = conn.cursor()
         cursor.execute(query, postid)
@@ -675,6 +714,7 @@ def comments(postid):
 def commentsubmit(postid):
     if 'userEmail' in session:
         comment_content = request.form['content']
+
         query = 'INSERT INTO comments (content, commentor_email, item_id) VALUES (%s, %s, %s)'
         cursor = conn.cursor()
         cursor.execute(query, (comment_content, session['userEmail'], postid))
