@@ -501,23 +501,34 @@ def addNewMember():
                                    duplicate="true", memExist=memExist)
 
 
+# Retrieving what post a user rated on and with what emoji
+# current page (whether it is index or shared posts) will have the updated emoji after being redirected
 @app.route('/rate', methods=['GET', 'POST'])
 def rate():
     user_email = session['userEmail']
     cursor = conn.cursor()
     page = 'index'
     item = list(request.form.keys())[0]
+
+    # if the user is rating on the shared page, make page = sharedPosts
+    # otherwise, it is already initialized to index page
     if 'share' in item:
         page = 'sharedPosts'
     cursor.rownumber = 0
+    # retrieve the item_id of what is being rated 
     rate_id = int(item.split('te')[-1])
+
+    # determine whether the rating already exists
     query = "SELECT * FROM Rate WHERE item_id = %s AND email = %s"
     cursor.execute(query, (rate_id, user_email))
     rate_exist = cursor.fetchone()
     cursor.rownumber = 0
+
+    # if rating already exists, uopdate the row 
     if rate_exist:
         query = "UPDATE Rate SET rate_time = CURRENT_TIMESTAMP, emoji = %s WHERE item_id = %s AND email = %s"
         cursor.execute(query, (request.form[item], rate_id, user_email))
+    # otherwise, insert a new row for the rating
     else:
         query = "INSERT INTO Rate (email, item_id, rate_time, emoji) VALUES (%s, %s, CURRENT_TIMESTAMP, %s)"
         cursor.execute(query, (user_email, rate_id, request.form[item]))
