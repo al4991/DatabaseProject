@@ -2,7 +2,7 @@
 Web app using Flask and MySql for CS-3083 Intro to Databases at NYU Tandon.  
 We are using Python 3, and are using pymysql to connect to our database.  
 
-**Description**
+**Description:**<br />
 PriCoSha is a Flask app developed by Andrew Lucero (me c:), Carolyn Ann McCawley, and Cindy Lee.  
 Our project has a public home page that will show content to users who are not logged in yet,   
 offering the option to register and to log in. After a user logs in, the user is redirected to the home  
