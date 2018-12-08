@@ -14,7 +14,7 @@
 
                 <div class="centered"> Post ID: {{ pend.item_id }} </div>
 
-                <div class="centered"> {{ pend.email_post }} </div>
+                <div class="centered"> Made by: {{ pend.email_post }} </div>
 
                 <div class="centered"> {{ pend.post_time }} </div>
 
@@ -24,9 +24,11 @@
                     {% endif %}
                 </div>
 
+                <div class="centered"> Tagged by: {{ pend.email_tagger }} </div>
+
                 <form action="/tagAuth" method="POST">
                     <input type="submit" name="{{ pend.email_tagger }}{{ pend.item_id }}" value="Accept">
-                    <input type="submit" name="{{ pend.email_tagged }}{{ pend.item_id }}" value="Reject">
+                    <input type="submit" name="{{ pend.email_tagger }}{{ pend.item_id }}" value="Reject">
                 </form>
             </div>
         {% endfor %}
