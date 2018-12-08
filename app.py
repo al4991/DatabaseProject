@@ -286,8 +286,15 @@ def sharedPosts():
         cursor.execute(query, (session['userEmail']))
         rate_data = cursor.fetchall()
 
+        cursor.rownumber = 0
+        query = "SELECT item_id, fname, lname" \
+                " FROM Tag NATURAL JOIN Person WHERE email_tagged = email and status = 'True'"
+        cursor.execute(query)
+        tags = cursor.fetchall()
+
         cursor.close()
-        return render_template('sharedPosts.html', shares=shares, rate_stats=rate_stats, rates=rate_data)
+        return render_template('sharedPosts.html', shares=shares, rate_stats=rate_stats,
+                               rates=rate_data, tags=tags)
     else:
         return redirect(url_for('index'))
 
@@ -556,21 +563,21 @@ def pending_tag():
 def tag_auth():
     user_email = session['userEmail']
     cursor = conn.cursor()
-    for item in request.form:
-        lst = item.split('@nyu.edu')
-        tagger, item_id = lst[0], int(lst[1])
-        status = request.form[item]
+    item = list(request.form.keys())[0]
+    lst = item.split('@nyu.edu')
+    tagger, item_id = lst[0], int(lst[1])
+    status = request.form[item]
 
-        # if user accepted tag, update row in table to be true 
-        if status == "Accept":
-            query = "UPDATE Tag SET status = 'True' WHERE email_tagger = %s" \
-                    " AND email_tagged = %s AND item_id = %s"
-        # otherwise, delete the row from the table
-        else:
-            query = "DELETE FROM Tag WHERE email_tagger = %s" \
-                    "AND email_tagged = %s AND item_id = %s"
-        cursor.execute(query, (tagger+'@nyu.edu', user_email, item_id))
-        conn.commit()
+    # if user accepted tag, update row in table to be true 
+    if status == "Accept":
+        query = "UPDATE Tag SET status = 'True' WHERE email_tagger = %s" \
+                " AND email_tagged = %s AND item_id = %s"
+    # otherwise, delete the row from the table
+    else:
+        query = "DELETE FROM Tag WHERE email_tagger = %s" \
+                "AND email_tagged = %s AND item_id = %s"
+    cursor.execute(query, (tagger+'@nyu.edu', user_email, item_id))
+    conn.commit()
     cursor.close()
     return redirect(url_for('pending_tag'))
 
