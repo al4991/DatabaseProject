@@ -1,12 +1,14 @@
 # PriCoSha
 Web app using Flask and MySql for CS-3083 Intro to Databases at NYU Tandon.  
 We are using Python 3, and are using pymysql to connect to our database.  
- 
+
+**Description**
 PriCoSha is a Flask app developed by Andrew Lucero (me c:), Carolyn Ann McCawley, and Cindy Lee.  
 Our project has a public home page that will show content to users who are not logged in yet,   
 offering the option to register and to log in. After a user logs in, the user is redirected to the home  
 page. On the home page, both guests and users are able to view public posts within the last 24 hours.   
-Users, however, can view all the posts that they created.   
+Users, however, can view all the posts that they created.  
+
 Users who are logged in have the ability to view posts that are shared with them, as well as the ability  
 to share posts, or tag other users in posts that public for them. When users are tagged in posts, they have  
 the ability to either decline or accept the tag (or just leave it as pending) on the pending tags page.  
@@ -20,7 +22,7 @@ that user belongs to. Speaking of groups, users have the option to create groups
 share content to. Users can add users to groups that they own.   
   
   
-Additional features: 
+**Additional features:** 
 - The ability to upload images in addition to text, and the ability to filter posts by content type    
   - Users can upload local images, and are able to press a simple button to    
     choose which types of posts they see  
@@ -37,7 +39,7 @@ Additional features:
     the user is redirected to another page, displaying the post and a list of current comments.   
     On that page, the user is able to submit a comment.   
    
- Contributions  
+**Contributions**  
   - Andrew implemented comments, posting and sharing  
   - Cindy implemented ratings and the tagging system (tagging a user and managing tags - accepting, viewing pending,
   and rejecting requests). Cindy performed project testing and debugging. 
