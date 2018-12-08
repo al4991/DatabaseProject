@@ -281,7 +281,7 @@ def sharedPosts():
         user_email = session['userEmail']
         cursor = conn.cursor()
         # Fetching all the shared posts seen by the user
-        query = "SELECT * FROM Share NATURAL JOIN Belong NATURAL JOIN ContentItem WHERE email = %s"
+        query = "SELECT * FROM Share NATURAL JOIN Belong NATURAL JOIN ContentItem WHERE email = %s ORDER BY post_time DESC"
         cursor.execute(query, user_email)
         shares = cursor.fetchall()
         cursor.rownumber = 0
