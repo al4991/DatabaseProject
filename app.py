@@ -28,35 +28,43 @@ def index():
     try:
         contentType = request.form['contentType']
 
+    # if no filter selected, show all content
     except Exception:
         contentType = "All"
-
+    # call content to select data that is shown on homepage
+    # different if user logged in or not
     data = content(sessionBool, contentType)
     cursor = conn.cursor()
-    # adding name of group that you own
+    
     if 'userEmail' in session:
+        #display the names of the groups that you own
         friendQuery = "SELECT fg_name FROM FriendGroup WHERE owner_email = %s"
         cursor.execute(friendQuery, session['userEmail'])
         friendData = cursor.fetchall()
         cursor.rownumber = 0
-    # adding name of group that you are a part of
+        
+        # display the name of the groups you belong to, but do now own
         memberQuery = "SELECT fg_name FROM Belong WHERE email = %s AND owner_email != %s"
         useremail = session['userEmail']
         cursor.execute(memberQuery, (useremail, useremail))
         memberData = cursor.fetchall()
         cursor.rownumber = 0
 
+        # looks for rating that the user did for a specific post
         query = "SELECT item_id, emoji FROM Rate WHERE email = %s"
         cursor.execute(query, (session['userEmail']))
         rate_data = cursor.fetchall()
         cursor.rownumber = 0
 
+        # select the posts and the name of the person who was tagged in the posts
+        # only posts that the user has accepted to be tagged in
         tag_query = "SELECT item_id, fname, lname" \
                     " FROM Tag NATURAL JOIN Person WHERE email_tagged = email and status = 'True'"
         cursor.execute(tag_query)
         tagged_items = cursor.fetchall()
         cursor.rownumber = 0
 
+    # finds the number of rates per emoji for ever post
     query = "SELECT item_id, emoji, count(*) AS emoji_count FROM Rate" \
             " GROUP BY item_id, emoji"
     cursor.execute(query)
@@ -64,19 +72,27 @@ def index():
 
     cursor.close()
     if 'userEmail' in session:
+        # if the user is logged in, they're redirected to the homepage where they can see their groups
+        # they can also go to pages to see whose tagged them in posts and whose shared posts with them
+        # user can see posts that public to them
         return render_template('index.html', ownedGroups=friendData,
                                memberGroups=memberData, posts=data,
                                rates=rate_data, rate_stats=rate_stats,
                                email=session['userEmail'],
                                contentType=contentType, tags=tagged_items)
     else:
+        # if user is not logged in they are only allowed to see public posts that have been posted within the last 24 hours
         return render_template('index.html', posts=data,
                                rate_stats=rate_stats, contentType=contentType)
 
 
+
 def content(inSession, contentType):
     cursor = conn.cursor()
+    # the user is allowed to filter content by the type so they can see all, text only posts or just images
     if inSession:
+        # if user is logged in they are allowed to see posts that are public to them 
+        # posts are ordered by most recent
         if contentType == "Text":
             query = "SELECT * FROM ContentItem WHERE ((is_pub = 1 AND post_time + INTERVAL 24 hour >= CURRENT_TIMESTAMP) OR email_post = %s) AND" \
                     " content_type = 'text' ORDER BY post_time DESC"
@@ -89,7 +105,8 @@ def content(inSession, contentType):
             query = "SELECT * FROM ContentItem WHERE (is_pub = 1 AND post_time + INTERVAL 24 hour >= CURRENT_TIMESTAMP) OR email_post = %s" \
                     " ORDER BY post_time DESC"
             cursor.execute(query, session['userEmail'])
-    # user not logged in and can only see public data
+
+    # user not logged in and can only see public posts
     else:
         if contentType == "Text":
             query = "SELECT * FROM ContentItem WHERE is_pub = 1 AND content_type = 'text'" \
@@ -107,50 +124,42 @@ def content(inSession, contentType):
     cursor.close()
     return data
 
-
+# login page and redirects back to hompepage
 @app.route('/login')
 def login():
     if 'userEmail' in session:
         return redirect(url_for('index'))
     return render_template('login.html')
 
-
+# checks the users input of their username and password with that of the database
+#if inncorrect, it sends the user an error message 
 @app.route('/loginAuth', methods=['GET', 'POST'])
 def loginAuth():
     user_email = request.form['userEmail']
     password = request.form['password']
-    # Set up cursor to prepare for executing queries
+
     cursor = conn.cursor()
-    # Templating the query to check email and password
-    # FOR THE FUTURE: we need to account for the fact that we will
-    # be hashing passwords
     query = 'SELECT fname, lname FROM PERSON WHERE email = %s and password = SHA2(%s, 256)'
     cursor.execute(query, (user_email, password))
-    # Grab the row with email and password (if it exists)
     data = cursor.fetchone()
-    # We're done with the cursor now so we can close it
     cursor.close()
-
-    # Checking to see if the login info actually exists or not
     if data:
-        # creates a session for the user
         session['userEmail'] = user_email
-        # redirecting user to our main page
         return redirect(url_for('index'))
     else:
-        # Means we didn't find the login info, so failed login
-        # We create an error to pass to our html
         error = "Invalid email or password"
         return render_template('login.html', error=error)
 
-
+#signup page
 @app.route('/register')
 def register():
     if 'userEmail' in session:
         return redirect(url_for('index'))
     return render_template('signup.html')
 
-
+#signup page where the user enters their first and last name and their username and password
+# checks that the email isn't already in the database and sends error if it is
+# if new user, saves their inputted information to the database
 @app.route('/registerAuth', methods=['GET', 'POST'])
 def registerAuth():
     # grabs information from the forms
@@ -179,6 +188,10 @@ def registerAuth():
         return render_template('index.html')
 
 
+# user is allowed to post text and image pasted posts
+# the user can make the post public or private
+# the post is then inserted into the contentitem table in the database
+# once posted, the user is redirected to home so their post is displayed at the top
 @app.route('/post', methods=['GET', 'POST'])
 def post():
     user_email = session['userEmail']
@@ -211,18 +224,22 @@ def post():
     return redirect(url_for('index'))
 
 
+# when user logs out, they are redirected to the homepage and their session is over
 @app.route('/logout')
 def logout():
     session.pop('userEmail')
     return redirect('/')
 
 
+#if user is logged in, they're redirected to page to add new group
+#if not, theyre redirected to index
 @app.route('/newGroup')
 def newGroup():
     if 'userEmail' in session:
         return render_template('newGroup.html', displayNewGroup="true")
     else:
         return redirect('/')
+
 
 
 @app.route('/share/<postid>')
@@ -591,6 +608,8 @@ def tag():
     return redirect(url_for('index'))
 
 
+# selects the content and the email of whoever is commenting (whoever is logged in)
+
 @app.route('/comments/<postid>', methods=['GET', 'POST'])
 def comments(postid):
     if 'userEmail' in session:
@@ -608,6 +627,8 @@ def comments(postid):
         return render_template('comments.html', data=data, post=main_post, postid=postid)
 
 
+# if user is logged in, their comment is added to the comment table and displayed on the page
+# comments are unique to a post
 @app.route('/commentsubmit/<postid>', methods=['GET', 'POST'])
 def commentsubmit(postid):
     if 'userEmail' in session:
